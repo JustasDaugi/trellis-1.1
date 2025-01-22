@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.1-alpine
+    environment:
+      POSTGRES_USER: justas
+      POSTGRES_PASSWORD: justas
+      POSTGRES_DB: trello
+    ports:
+      - "5432"
+    volumes:
+      - trello:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    environment:
+      DATABASE_URL: postgres://justas:justas@postgres:5432/trello
+      PORT: 3000
+    ports:
+      - "3000"
+    depends_on:
+      - postgres
+
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    environment:
+      API_PROXY_PASS: http://server:3000
+    ports:
+      - "3001:80"
+    depends_on:
+      - server
+
+volumes:
+  trello:
