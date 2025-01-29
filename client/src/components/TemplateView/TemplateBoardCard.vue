@@ -1,16 +1,19 @@
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router'
 import type { Selectable } from 'kysely'
-import type { BoardPublic } from '@server/shared/types'
+import type { BoardTemplatePublic } from '@server/shared/types'
 import { getBackgroundImageUrl } from '@/utils/fetchImage'
 
 const props = defineProps<{
-  board: Selectable<BoardPublic>
+  board: Omit<Selectable<BoardTemplatePublic>, 'userId'>
 }>()
 
 const { board } = props
 
-const backgroundImageUrl = getBackgroundImageUrl(board)
+const backgroundImageUrl = getBackgroundImageUrl({
+  ...board,
+  userId: 0,
+})
 </script>
 
 <template>
