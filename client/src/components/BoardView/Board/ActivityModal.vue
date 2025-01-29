@@ -2,7 +2,27 @@
 import { ref, defineEmits, watch, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import { trpc } from '@/trpc'
-import type { ActivityInput } from '@server/entities/activity'
+
+type ActivityAction = 'created' | 'updated' | 'deleted';
+type ActivityEntityType = 'card' | 'list';
+
+interface Activity {
+  id: string;
+  cardId?: string;
+  listId: string;
+  userId: string;
+  action: ActivityAction;
+  entityType: ActivityEntityType;
+  boardId: string;
+  localTitle?: string;
+  field?: string;
+  previousValue?: any;
+  newValue?: any;
+  description: string;
+  previousDueDate?: string | null;
+  newDueDate?: string | null;
+  timestamp?: Date;
+}
 
 const route = useRoute()
 const boardId = Number(route.params.id)
@@ -17,7 +37,7 @@ const props = defineProps({
 const emit = defineEmits(['update:isOpen'])
 
 const localIsOpen = ref(props.isOpen)
-const logs = ref<ActivityInput[]>([])
+const logs = ref<Activity[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 
@@ -39,7 +59,7 @@ const fetchLogs = async () => {
     const response = await trpc.activity.get.query(queryPayload)
 
     if (response.success) {
-      logs.value = response.logs as ActivityInput[]
+      logs.value = response.logs as unknown as Activity[]
     } else {
       errorMessage.value = 'Failed to fetch activity logs.'
     }
