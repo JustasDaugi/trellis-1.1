@@ -1,6 +1,7 @@
 import { MongoClient, Db } from 'mongodb'
 import type { DB, Log } from './types'
 import dotenv from 'dotenv'
+import logger from '@server/utils/logger/logger'
 
 dotenv.config()
 
@@ -18,15 +19,14 @@ export async function connectToDatabase(dbName: string): Promise<DB> {
   if (!database) {
     try {
       await client.connect()
-      console.log('Connected to MongoDB')
+      logger.info('Connected to MongoDB')
       database = client.db(dbName)
     } catch (error) {
-      console.error('Failed to connect to MongoDB:', error)
+      logger.error({ err: error }, 'Failed to connect to MongoDB')
       throw error
     }
   }
 
-  // Return a typed DB object with all collections
   return {
     logs: database.collection<Log>('logs'),
   }
@@ -35,7 +35,7 @@ export async function connectToDatabase(dbName: string): Promise<DB> {
 export async function closeDatabaseConnection() {
   if (client) {
     await client.close()
-    console.log('MongoDB connection closed')
+    logger.info('MongoDB connection closed')
     database = null
   }
 }
