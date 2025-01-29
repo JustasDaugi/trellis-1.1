@@ -2,11 +2,13 @@
 import UpdateBoard from './UpdateBoard.vue'
 import DeleteBoard from './DeleteBoard.vue'
 import ShareBoard from '@/components/BoardView/Board/ShareBoard.vue'
+import ActivityModal from './ActivityModal.vue'
 import type { BoardPublic } from '@server/shared/types'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
   board: BoardPublic
+  userId: number
 }>()
 
 const emit = defineEmits<{
@@ -15,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const isOpen = ref(false)
+const isActivityModalOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 const deleteBoardRef = ref<InstanceType<typeof DeleteBoard> | null>(null)
 
@@ -37,15 +40,8 @@ const changeName = (newName: string) => {
   closeDropdown()
 }
 
-const cancelUpdate = () => {
-  closeDropdown()
-}
-
-const cancelDelete = () => {
-  closeDropdown()
-}
-
-const cancelShare = () => {
+const openActivityModal = () => {
+  isActivityModalOpen.value = true
   closeDropdown()
 }
 
@@ -83,8 +79,15 @@ onBeforeUnmount(() => {
         :board="props.board"
         :closeDropdown="closeDropdown"
         @change-name="changeName"
-        @cancel="cancelUpdate"
+        @cancel="closeDropdown"
       />
+      <button
+        @click="openActivityModal"
+        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+      >
+        View Activity
+      </button>
+      <ShareBoard :boardId="props.board.id" @cancel="closeDropdown" />
       <button
         @click="onDelete"
         class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
@@ -95,9 +98,14 @@ onBeforeUnmount(() => {
         ref="deleteBoardRef"
         :board="props.board"
         @delete-board="emit('delete-board')"
-        @cancel="cancelDelete"
+        @cancel="closeDropdown"
       />
-      <ShareBoard :boardId="props.board.id" @cancel="cancelShare" />
     </div>
+
+    <ActivityModal
+      v-model:isOpen="isActivityModalOpen"
+      :board="props.board"
+      :userId="props.userId"
+    />
   </div>
 </template>
