@@ -5,6 +5,7 @@ import { boardRepository } from '@server/repositories/boardRepository'
 import { connectToDatabase } from '@server/database/mongo'
 import NotFoundError from '@server/utils/errors/NotFound'
 import { z } from 'zod'
+import logger from '@server/utils/logger/logger'
 
 export default publicProcedure
   .use(
@@ -40,7 +41,7 @@ export default publicProcedure
 
       return { success: true, logs }
     } catch (error) {
-      console.error('Error retrieving logs:', error)
+      logger.error('Error retrieving logs:', error)
       return { success: false, error: 'Failed to retrieve logs' }
     }
   })
