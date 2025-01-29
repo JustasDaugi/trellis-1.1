@@ -25,8 +25,8 @@ export default publicProcedure
   .query(
     async ({ input: { cardId, listId, boardId, userId }, ctx: { repos } }) => {
       const lists = await repos.listRepository.findByBoardId(boardId)
-      const list = lists.find((list) => list.id === listId)
-      if (!list) {
+      const foundList = lists.find((l) => l.id === listId)
+      if (!foundList) {
         throw new NotFoundError(
           `No list found for List ID ${listId} in Board ID ${boardId}.`
         )
@@ -37,11 +37,11 @@ export default publicProcedure
         throw new NotFoundError(`User with ID ${userId} not found.`)
       }
 
-      let card
+      let foundCard = null
       if (cardId) {
         const cards = await repos.cardRepository.findByListId(listId)
-        card = cards.find((card) => card.id === cardId)
-        if (!card) {
+        foundCard = cards.find((c) => c.id === cardId)
+        if (!foundCard) {
           throw new NotFoundError(
             `No card found for Card ID ${cardId} in List ID ${listId}.`
           )
@@ -49,9 +49,9 @@ export default publicProcedure
       }
 
       return {
-        card: card ? { title: card.title } : null,
+        card: foundCard ? { title: foundCard.title } : null,
         list: {
-          title: list.title,
+          title: foundList.title,
         },
         user: {
           firstName: user.firstName,
