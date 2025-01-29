@@ -53,6 +53,25 @@ export function cardRepository(db: Database) {
     async delete(id: number): Promise<void> {
       await db.deleteFrom('card').where('id', '=', id).execute()
     },
+
+    async addDueDate(id: number, dueDate: Date | null): Promise<CardPublic> {
+      return db
+        .updateTable('card')
+        .set({ dueDate: dueDate ? dueDate.toISOString() : null })
+        .where('id', '=', id)
+        .returning(cardKeysPublic)
+        .executeTakeFirstOrThrow()
+    },
+
+    async getDueDate(id: number): Promise<Date | null> {
+      const result = await db
+        .selectFrom('card')
+        .select(['dueDate'])
+        .where('id', '=', id)
+        .executeTakeFirst()
+
+      return result?.dueDate ? new Date(result.dueDate) : null
+    },
   }
 }
 
