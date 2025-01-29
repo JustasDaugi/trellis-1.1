@@ -7,7 +7,7 @@ import {
   type LogInput,
 } from './utils'
 
-import { io } from '@server/app'
+import { io } from '@server/index'
 import { slackBot } from '../../service/slackBot'
 import logger from '@server/utils//logger/logger'
 
