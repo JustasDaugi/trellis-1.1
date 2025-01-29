@@ -5,7 +5,7 @@ import { createCallerFactory } from '@server/trpc'
 import { wrapInRollbacks } from '@tests/utils/transactions'
 import { insertAll } from '@tests/utils/records'
 import { vi, type MockInstance } from 'vitest'
-import * as sendModule from '@server/service/sendEmail';
+import * as sendModule from '@server/service/email';
 import boardRouter from '..'
 
 
