@@ -9,11 +9,6 @@ import type { Database } from './database'
 import { appRouter } from './controllers'
 import type { Context } from './trpc'
 import config from './config'
-import { createServer } from 'http'
-import { Server as SocketIOServer } from 'socket.io'
-import logger from '@server/utils/logger/logger'
-
-export const io: SocketIOServer | null = null
 
 export default function createApp(db: Database) {
   const app = express()
@@ -48,22 +43,5 @@ export default function createApp(db: Database) {
     )
   }
 
-  const httpServer = createServer(app)
-
-  const socketServer = new SocketIOServer(httpServer, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-    },
-  })
-
-  socketServer.on('connection', (socket) => {
-    logger.info('A client connected via Socket.IO')
-
-    socket.on('disconnect', () => {
-      logger.info('A client disconnected')
-    })
-  })
-
-  return httpServer
+  return app
 }
