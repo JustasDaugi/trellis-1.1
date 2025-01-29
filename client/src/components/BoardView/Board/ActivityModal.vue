@@ -21,7 +21,6 @@ const logs = ref<Log[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-// Fetch logs dynamically based on boardId
 const fetchLogs = async () => {
   if (!boardId) {
     errorMessage.value = 'Invalid or missing boardId.'
@@ -32,13 +31,11 @@ const fetchLogs = async () => {
   errorMessage.value = ''
 
   try {
-    // Prepare the query payload with just boardId and limit
     const queryPayload = {
       boardId,
-      limit: 50, // Optional limit parameter
+      limit: 50,
     }
 
-    // Fetch logs from the backend
     const response = await trpc.activity.get.query(queryPayload)
 
     if (response.success) {
@@ -54,18 +51,16 @@ const fetchLogs = async () => {
   }
 }
 
-// Watch for changes in the modal's open state
 watch(
   () => props.isOpen,
   (newVal) => {
     localIsOpen.value = newVal
     if (newVal) {
-      fetchLogs() // Fetch logs when the modal opens
+      fetchLogs()
     }
   }
 )
 
-// Close the modal
 const closeModal = () => {
   localIsOpen.value = false
   emit('update:isOpen', false)
@@ -77,7 +72,6 @@ onBeforeMount(async () => {
     return
   }
 
-  // Fetch initial data if needed
   if (props.isOpen) {
     await fetchLogs()
   }
@@ -88,7 +82,6 @@ onBeforeMount(async () => {
   <div v-if="localIsOpen">
     <transition name="fade">
       <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-        <!-- Added max-height and overflow-y-auto for the scrollbar -->
         <div
           class="max-h-[80vh] w-96 scale-95 transform overflow-y-auto rounded-md bg-white p-6 shadow-lg transition-transform"
         >
@@ -97,13 +90,10 @@ onBeforeMount(async () => {
             <p class="text-sm text-gray-600">View and track activity related to this board.</p>
           </div>
 
-          <!-- Loading indicator -->
           <div v-if="isLoading" class="mb-4 text-center text-gray-500">Loading...</div>
 
-          <!-- Error message -->
           <div v-if="errorMessage" class="mb-4 text-center text-red-500">{{ errorMessage }}</div>
 
-          <!-- Logs List -->
           <ul v-if="logs.length" class="mb-6 divide-y divide-gray-200">
             <li v-for="log in logs" :key="log.id" class="py-2 text-sm text-gray-700">
               <p>{{ log.description }}</p>
