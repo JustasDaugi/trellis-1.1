@@ -82,6 +82,7 @@ export const fakeCard = <T extends Partial<Insertable<Card>>>(overrides: T) =>
     listId: randomId(),
     createdAt: new Date(),
     updatedAt: new Date(),
+    dueDate: null,
     ...overrides,
   }) satisfies Insertable<Card>
 
