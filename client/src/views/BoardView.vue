@@ -3,6 +3,7 @@ import draggable from 'vuedraggable'
 import { ref, onBeforeMount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { trpc } from '@/trpc'
+import { authUserId } from '@/stores/user'
 import AddListButton from '../components/BoardView/AddListButton.vue'
 import ListDropdown from '../components/BoardView/List/ListDropdown.vue'
 import BoardDropdown from '../components/BoardView/Board/BoardDropdown.vue'
@@ -10,9 +11,18 @@ import AddCard from '../components/AddCard.vue'
 import CardActions from '../components/BoardView/Card/CardActions.vue'
 import { useBackgroundImage } from '@/utils/fetchImage'
 import type { ListPublic, BoardPublic, CardPublic } from '@server/shared/types'
+import { io } from 'socket.io-client'
 
 type ListCards = ListPublic & {
   cards: CardPublic[]
+}
+
+export type UpdateCardPayload = {
+  updatedField: string
+  previousValue: any
+  newValue: any
+  previousDueDate?: string | null
+  newDueDate?: string | null
 }
 
 const route = useRoute()
@@ -21,8 +31,11 @@ const board = ref<BoardPublic | null>(null)
 const lists = ref<ListCards[]>([])
 const selectedCard = ref<CardPublic | null>(null)
 const showDialog = ref(false)
+const cardDueDates = ref<Record<number, string | null>>({})
 
 const boardId = Number(route.params.id)
+const userId = ref<number | null>(authUserId.value)
+const userFirstName = ref<string | null>(null)
 
 onBeforeMount(async () => {
   try {
@@ -32,9 +45,17 @@ onBeforeMount(async () => {
     } else {
       console.error('Board not found')
     }
-    await fetchLists()
+
+    if (userId.value !== null) {
+      const user = await trpc.user.findById.query({ id: userId.value })
+      userFirstName.value = user?.firstName || null
+
+      await fetchLists()
+    } else {
+      console.error('User ID is not available.')
+    }
   } catch (error) {
-    console.error('Error fetching board or lists:', error)
+    console.error('Error initializing BoardView:', error)
   }
 })
 
@@ -50,6 +71,13 @@ const fetchLists = async () => {
         try {
           const fetchedCards: CardPublic[] = await trpc.card.find.mutate({ listId: list.id })
           list.cards = fetchedCards
+
+          await Promise.all(
+            fetchedCards.map(async (card) => {
+              const dueDate = await trpc.card.getDueDate.query({ id: card.id })
+              cardDueDates.value[card.id] = dueDate ? new Date(dueDate).toLocaleString() : null
+            })
+          )
         } catch (error) {
           console.error(`Error fetching cards for list ${list.id}:`, error)
         }
@@ -61,8 +89,130 @@ const fetchLists = async () => {
   }
 }
 
+const logActivity = async (
+  cardId: number | undefined,
+  listId: number,
+  userId: number,
+  action: 'created' | 'updated' | 'deleted',
+  entityType: 'card' | 'list',
+  localTitle?: string,
+  field?: string,
+  previousValue?: any,
+  newValue?: any,
+  previousDueDate?: string | null,
+  newDueDate?: string | null
+) => {
+  try {
+    if (!board.value) {
+      throw new Error('Board is not loaded yet.')
+    }
+
+    const activity = await trpc.activity.format.query({
+      cardId: entityType === 'card' ? cardId : undefined,
+      listId,
+      boardId: board.value.id,
+      userId,
+    })
+
+    await trpc.activity.log.mutate({
+      cardId: cardId,
+      listId,
+      boardId: board.value.id,
+      userId,
+      action,
+      entityType,
+      localTitle: localTitle || activity.card?.title || activity.list?.title,
+      field,
+      previousValue,
+      newValue,
+      previousDueDate,
+      newDueDate,
+      description: '',
+    })
+  } catch (error) {
+    console.error(`Error logging activity for ${action} ${entityType}:`, error)
+  }
+}
+
+const handleListDelete = async (listId: number) => {
+  try {
+    lists.value = lists.value.filter((list) => list.id !== listId)
+  } catch (error) {
+    console.error('Error deleting list:', error)
+  }
+}
+
+const handleCardDelete = async (cardId: number, listId: number) => {
+  try {
+    const list = lists.value.find((list) => list.id === listId)
+    if (list) {
+      list.cards = list.cards.filter((card) => card.id !== cardId)
+    }
+  } catch (error) {
+    console.error('Error deleting card:', error)
+  }
+}
+
+const handleUpdateCard = ({
+  updatedField,
+  previousValue,
+  newValue,
+  previousDueDate,
+  newDueDate,
+}: UpdateCardPayload) => {
+  if (selectedCard.value && selectedCard.value.id && selectedCard.value.listId) {
+    handleCardUpdate(
+      selectedCard.value.id,
+      selectedCard.value.listId,
+      updatedField,
+      previousValue,
+      newValue,
+      previousDueDate,
+      newDueDate
+    )
+  } else {
+    console.error('selectedCard is null or its properties are missing.')
+  }
+}
+
+const handleCardUpdate = async (
+  cardId: number,
+  listId: number,
+  updatedField: string,
+  previousValue: any,
+  newValue: any,
+  previousDueDate?: string | null,
+  newDueDate?: string | null
+) => {
+  try {
+    if (userId.value !== null) {
+      await logActivity(
+        cardId,
+        listId,
+        userId.value,
+        'updated',
+        'card',
+        undefined,
+        updatedField,
+        previousValue,
+        newValue,
+        previousDueDate,
+        newDueDate
+      )
+    }
+    await fetchLists()
+  } catch (error) {
+    console.error('Error handling card update:', error)
+  }
+}
+
 const renderList = (newList: ListPublic) => {
   lists.value.push({ ...newList, cards: [] })
+  if (userId.value !== null) {
+    logActivity(undefined, newList.id, userId.value, 'created', 'list', newList.title).catch(
+      (error) => console.error('Error logging list creation:', error)
+    )
+  }
 }
 
 function navigateToMainView() {
@@ -75,6 +225,11 @@ const createCard = (listId: number, card: CardPublic) => {
   const list = lists.value.find((lst) => lst.id === listId)
   if (list) {
     list.cards.push(card)
+    if (userId.value !== null) {
+      logActivity(card.id, listId, userId.value, 'created', 'card', card.title).catch((error) =>
+        console.error('Error logging card creation:', error)
+      )
+    }
   } else {
     console.error(`List with ID ${listId} not found`)
   }
@@ -91,35 +246,6 @@ const openCardDialog = (card: CardPublic) => {
 const closeCardDialog = () => {
   selectedCard.value = null
   showDialog.value = false
-}
-
-const handleCardUpdate = async () => {
-  await fetchLists()
-}
-
-const handleCardDelete = async () => {
-  await fetchLists()
-  closeCardDialog()
-}
-
-const onCardDragEnd = async (evt: any, targetListId: number) => {
-  const { item } = evt
-  const card = item as CardPublic
-
-  if (card.listId !== targetListId) {
-    try {
-      const updatedCard = await trpc.card.update.mutate({
-        id: card.id,
-        listId: targetListId,
-      })
-
-      console.log(`Card updated successfully:`, updatedCard)
-
-      fetchLists()
-    } catch (error) {
-      console.error('Error updating card listId:', error)
-    }
-  }
 }
 </script>
 
@@ -153,8 +279,9 @@ const onCardDragEnd = async (evt: any, targetListId: number) => {
           <h1 class="ml-4 text-white">{{ board.title }}</h1>
         </div>
         <BoardDropdown
-          v-if="board"
+          v-if="board && userId"
           :board="board"
+          :userId="userId"
           @change-name="
             (newName) => {
               if (board) board.title = newName
@@ -180,15 +307,9 @@ const onCardDragEnd = async (evt: any, targetListId: number) => {
               :list="list"
               :board="board"
               @change-name="(newName) => (list.title = newName)"
-              @delete-list="fetchLists"
+              @delete-list="() => handleListDelete(list.id)"
             />
-            <draggable
-              v-model="list.cards"
-              group="cards"
-              :animation="200"
-              item-key="id"
-              @end="(evt) => onCardDragEnd(evt, list.id)"
-            >
+            <draggable v-model="list.cards" group="cards" :animation="200" item-key="id">
               <template #item="{ element }">
                 <div
                   class="mb-2 w-full cursor-pointer rounded bg-white p-2 text-black hover:bg-gray-100"
@@ -196,6 +317,10 @@ const onCardDragEnd = async (evt: any, targetListId: number) => {
                 >
                   <h3 class="text-sm font-semibold">{{ element.title }}</h3>
                   <p v-if="element.description" class="text-xs">{{ element.description }}</p>
+                  <p v-if="element.dueDate" class="mt-1 text-xs text-gray-500">
+                    Due: {{ new Date(element.dueDate).toLocaleString() }}
+                  </p>
+                  <p v-if="cardDueDates[element.id]" class="mt-1 text-xs text-gray-500"></p>
                 </div>
               </template>
             </draggable>
@@ -209,14 +334,15 @@ const onCardDragEnd = async (evt: any, targetListId: number) => {
     <CardActions
       v-if="selectedCard"
       :card="selectedCard"
-      @update-card="handleCardUpdate"
-      @delete-card="handleCardDelete"
+      @update-card="handleUpdateCard"
+      @delete-card="
+        () => {
+          if (selectedCard && selectedCard.id && selectedCard.listId) {
+            handleCardDelete(selectedCard.id, selectedCard.listId)
+            closeCardDialog()
+          }
+        }
+      "
     />
   </div>
 </template>
-
-<style scoped>
-.fixed-spacing {
-  gap: 1rem !important;
-}
-</style>
