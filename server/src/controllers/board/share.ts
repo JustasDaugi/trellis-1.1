@@ -7,7 +7,7 @@ import { userSchema } from '@server/entities/user'
 import { z } from 'zod'
 import NotFoundError from '@server/utils/errors/NotFound'
 import InternalServerError from "@server/utils/errors/InternalServerError";
-import sendEmail from '@server/service/sendEmail'
+import sendEmail from '@server/service/email'
 
 
 const shareBoardInput = z.object({
