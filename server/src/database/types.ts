@@ -22,12 +22,13 @@ export interface BoardTemplate {
   selectedBackground: string | null
   title: string
   updatedAt: Generated<Timestamp>
-  userId: number
+  userId: number | null
 }
 
 export interface Card {
   createdAt: Generated<Timestamp>
   description: string | null
+  dueDate: Timestamp | null
   id: Generated<number>
   listId: number
   order: number | null
