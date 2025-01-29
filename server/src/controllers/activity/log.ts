@@ -8,8 +8,8 @@ import {
 } from './utils'
 
 import { io } from '@server/app'
-
 import { slackBot } from '../../service/slackBot'
+import logger from '@server/utils//logger/logger'
 
 export default publicProcedure
   .input(activitySchema)
@@ -23,9 +23,9 @@ export default publicProcedure
 
       try {
         await slackBot.sendDescription(logInput)
-        console.log('Slack message sent for new/updated log.')
+        logger.info('Slack message sent for new/updated log.')
       } catch (slackError) {
-        console.error('Error sending Slack message:', slackError)
+        logger.error({ err: slackError }, 'Error sending Slack message')
       }
 
       if (io) {
@@ -34,7 +34,7 @@ export default publicProcedure
 
       return { success: true, message: 'Activity logged successfully' }
     } catch (error) {
-      console.error('Error logging activity:', error)
+      logger.error({ err: error }, 'Error logging activity')
       return { success: false, error: 'Failed to log activity' }
     }
   })
