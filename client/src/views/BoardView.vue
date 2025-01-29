@@ -11,7 +11,6 @@ import AddCard from '../components/AddCard.vue'
 import CardActions from '../components/BoardView/Card/CardActions.vue'
 import { useBackgroundImage } from '@/utils/fetchImage'
 import type { ListPublic, BoardPublic, CardPublic } from '@server/shared/types'
-import { io } from 'socket.io-client'
 
 type ListCards = ListPublic & {
   cards: CardPublic[]
