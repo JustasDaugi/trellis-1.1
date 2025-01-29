@@ -81,8 +81,8 @@ jobs:
       # respond with a non-failing status code.
       # This assumes we have a public /api/health endpoint in our
       # Express server that returns a non-failing status code.
-      - name: Show Running Processes
-        run: ps aux | grep node
+      - name: Check Listening Ports
+        run: netstat -tulnp | grep 3000 || echo "No process is listening on port 3000"
 
       - name: Wait for server to startup
         uses: Jtalk/url-health-check-action@v4
