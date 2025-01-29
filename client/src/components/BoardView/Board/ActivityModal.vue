@@ -2,7 +2,7 @@
 import { ref, defineEmits, watch, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import { trpc } from '@/trpc'
-import type { Log } from '@server/database/mongo/types'
+import type { ActivityInput } from '@server/entities/activity'
 
 const route = useRoute()
 const boardId = Number(route.params.id)
@@ -17,7 +17,7 @@ const props = defineProps({
 const emit = defineEmits(['update:isOpen'])
 
 const localIsOpen = ref(props.isOpen)
-const logs = ref<Log[]>([])
+const logs = ref<ActivityInput[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 
@@ -39,7 +39,7 @@ const fetchLogs = async () => {
     const response = await trpc.activity.get.query(queryPayload)
 
     if (response.success) {
-      logs.value = response.logs as Log[]
+      logs.value = response.logs as ActivityInput[]
     } else {
       errorMessage.value = 'Failed to fetch activity logs.'
     }
