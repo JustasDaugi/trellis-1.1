@@ -65,28 +65,32 @@ jobs:
       # We must start the server first. & at the end of the command
       # makes it run in the background. While it is starting up,
       # we will continue with other steps.
-      - name: Start Server for E2E Tests
-        run: npm run start -w=server &  # Use `start`, not `dev`
+      - name: Start server for E2E tests
+        run: npm run start -w=server &
 
-      - name: Debug - Show Running Processes
-        run: ps aux | grep node
+      # Build the front end for E2E tests. We are building it
+      # instead of running it in dev mode because there is some
+      # differences between dev mode and production mode front
+      # end code.
+      - name: Build front end for E2E tests
+        run: npm run build -w=client
 
-      - name: Debug - Check Listening Ports
-        run: netstat -tulnp | grep 3000 || echo "No process is listening on port 3000"
-
-      - name: Wait for Server to Start
-        run: sleep 15  # Give extra time for startup
+      # Just to make sure that our server is up and running before
+      # we start our E2E tests, we will use a health check action
+      # which will make a request to the server and wait for it to
+      # respond with a non-failing status code.
+      # This assumes we have a public /api/health endpoint in our
+      # Express server that returns a non-failing status code.
 
       - name: Wait for server to startup
         uses: Jtalk/url-health-check-action@v4
         with:
-          url: http://localhost:3000/api/health
-          max-attempts: 15
-          retry-delay: 10s
+          max-attempts: 5
+          retry-delay: 5s
+          url: ${{ env.VITE_API_ORIGIN }}/api/health
 
-      - name: Show Server Logs if Health Check Fails
-        if: failure()
-        run: cat server/logs/output.log || echo "No logs found"
+      - name: Test client E2E
+        run: npm run test:e2e -w=client
 
       # Playwright generates a report of the E2E tests. We will
       # upload that report as an artifact so that we can download
