@@ -12,6 +12,7 @@ const repos = {
         listId,
         title: 'Test card',
         order: 1,
+        dueDate: null,
       }),
     ],
   } satisfies Partial<CardRepository>,
