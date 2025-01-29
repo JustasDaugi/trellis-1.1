@@ -98,7 +98,7 @@ onBeforeMount(async () => {
             <li v-for="log in logs" :key="log.id" class="py-2 text-sm text-gray-700">
               <p>{{ log.description }}</p>
               <p class="mt-1 text-xs text-gray-500">
-                {{ log.timestamp.toLocaleString() }}
+                {{ log.timestamp?.toLocaleString() ?? 'No timestamp available' }}
               </p>
             </li>
           </ul>
