@@ -99,7 +99,7 @@ const logActivity = async (
   previousValue?: any,
   newValue?: any,
   previousDueDate?: string | null,
-  newDueDate?: string | null
+  newDueDate?: string | null,
 ) => {
   try {
     if (!board.value) {
@@ -114,20 +114,22 @@ const logActivity = async (
     })
 
     await trpc.activity.log.mutate({
-      cardId: cardId,
-      listId,
-      boardId: board.value.id,
-      userId,
-      action,
-      entityType,
-      localTitle: localTitle || activity.card?.title || activity.list?.title,
-      field,
-      previousValue,
-      newValue,
-      previousDueDate,
-      newDueDate,
-      description: '',
-    })
+    cardId: cardId,
+    listId,
+    boardId: board.value.id,
+    userId,
+    action,
+    entityType,
+    localTitle: localTitle || activity.card?.title || activity.list?.title,
+    field,
+    previousValue,
+    newValue,
+    previousDueDate,
+    newDueDate,
+    description: '',
+    id: '',
+    timestamp: undefined
+})
   } catch (error) {
     console.error(`Error logging activity for ${action} ${entityType}:`, error)
   }
