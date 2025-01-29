@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { idSchema } from './shared'
 
 export const activitySchema = z.object({
+  id: z.string(),
   cardId: idSchema.optional(),
   listId: idSchema,
   userId: idSchema,
@@ -15,6 +16,7 @@ export const activitySchema = z.object({
   description: z.string(),
   previousDueDate: z.string().nullable().optional(),
   newDueDate: z.string().nullable().optional(),
+  timestamp: z.date()
 })
 
 export const activityKeysAll = Object.keys(activitySchema.shape)
