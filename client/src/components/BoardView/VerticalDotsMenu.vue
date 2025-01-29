@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref, defineEmits, defineProps, onMounted, onBeforeUnmount } from 'vue'
 import type { ListPublic } from '@server/shared/types'
-import ChangeNameSection from './UpdateList.vue'
-import DeleteList from './DeleteList.vue'
+import ChangeNameSection from './List/UpdateList.vue'
+import DeleteList from './List/DeleteList.vue'
 
 const emit = defineEmits<{
   (e: 'click'): void
