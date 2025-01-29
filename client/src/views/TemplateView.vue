@@ -9,7 +9,7 @@ import { FwbButton } from 'flowbite-vue'
 import { isLoggedIn, logout } from '@/stores/user'
 import { trpc } from '@/trpc'
 import type { Selectable } from 'kysely'
-import type { BoardPublic } from '@server/shared/types'
+import type { BoardTemplatePublic } from '@server/shared/types'
 
 const isSidebarOpen = ref(false)
 const toggleSidebar = () => {
@@ -28,7 +28,7 @@ function logoutUser() {
 
 const loggedIn = computed(() => isLoggedIn.value)
 
-const templates = ref<Selectable<BoardPublic>[]>([])
+const templates = ref<Selectable<BoardTemplatePublic>[]>([])
 
 const fetchTemplates = async () => {
   templates.value = await trpc.template.getBoards.query()
