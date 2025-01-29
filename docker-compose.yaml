@@ -12,30 +12,17 @@ services:
     volumes:
       - trello:/var/lib/postgresql/data
 
-  mongo:
-    image: mongo:8.0
-    container_name: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-
   server:
     build:
       context: .
       dockerfile: ./server/Dockerfile
-    env_file:
-      - ./server/.env
     environment:
       DATABASE_URL: postgres://justas:justas@postgres:5432/trello
-      MONGO_URI: mongodb://mongo:27017
       PORT: 3000
     ports:
-      - "3000:3000"
+      - "3000"
     depends_on:
       - postgres
-      - mongo
 
   client:
     build:
@@ -50,4 +37,3 @@ services:
 
 volumes:
   trello:
-  mongo_data:
