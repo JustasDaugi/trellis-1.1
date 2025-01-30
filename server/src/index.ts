@@ -6,12 +6,12 @@ import config from './config'
 import logger from '@server/utils/logger/logger'
 
 const database = createDatabase(config.database)
-
 const app = createApp(database)
 
 const httpServer = createServer(app)
 
 export const io = new SocketIOServer(httpServer, {
+  path: '/api/sockets',
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
