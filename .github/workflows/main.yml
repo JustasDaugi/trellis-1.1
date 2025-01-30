@@ -56,9 +56,6 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      # - name: Build server
-      #   run: npm run build -w=server
-
       - name: Start server for E2E tests
         run: npm run dev -w=server &
 
@@ -119,10 +116,6 @@ jobs:
           -t $SERVER_IMAGE_TAG
           -f ./server/Dockerfile .
 
-      # If you need to pass additional environment variables to the client
-      # build, for example if the environment variable must be baked at build time,
-      # you would pass them as Docker build arguments here. For simplicity, we
-      # are just building with defaults from Dockerfile:
       - name: Build client image
         run: >-
           docker build
@@ -162,7 +155,6 @@ jobs:
               },
               "environment": {
                 "API_PROXY_PASS": "http://localhost:3000",
-                "VITE_SOCKET_URL": "${{ vars.VITE_SOCKET_URL }}"
               }
             },
             "server": {
@@ -183,7 +175,7 @@ jobs:
                 "REDIRECT_URI": "${{ secrets.REDIRECT_URI }}",
                 "SLACK_BOT_TOKEN": "${{ secrets.SLACK_BOT_TOKEN }}",
                 "SLACK_CHANNEL_ID": "${{ secrets.SLACK_CHANNEL_ID }}",
-                "MONGO_URI": "${{ secrets.MONGO_URI }}"
+                "MONGO_URI": "${{ vars.MONGO_URI }}"
               }
             }
           }' > containers.json
