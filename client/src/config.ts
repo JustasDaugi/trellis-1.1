@@ -12,9 +12,10 @@ if (typeof apiPath !== 'string') {
   throw new Error('VITE_API_PATH is not defined')
 }
 
-const socketUrl = import.meta.env.VITE_SOCKET_URL
+const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin
 
 export const socket = io(socketUrl, {
+  path: '/api/sockets',
   withCredentials: true,
   transports: ['websocket'],
 })
