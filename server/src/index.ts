@@ -19,10 +19,10 @@ export const io = new SocketIOServer(httpServer, {
 })
 
 io.on('connection', (socket) => {
-  logger.info('A client connected via Socket.IO')
+  logger.info('client connected via Socket.IO')
 
   socket.on('disconnect', () => {
-    logger.info('A client disconnected')
+    logger.info('client disconnected')
   })
 })
 
