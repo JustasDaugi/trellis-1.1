@@ -15,7 +15,6 @@ if (typeof apiPath !== 'string') {
 const socketUrl = import.meta.env.VITE_SOCKET_URL
 
 export const socket = io(socketUrl, {
-  path: "/socket.io/",
   withCredentials: true,
   transports: ['websocket'],
 })
