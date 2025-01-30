@@ -25,9 +25,3 @@ COPY client/nginx/default.conf.template /etc/nginx/templates/default.conf.templa
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
-
-
-# Argument is an environment variable
-
-# docker build -t app/client -f ./client/Dockerfile .
-# docker run -d --name client -p 3001:80 app/client
