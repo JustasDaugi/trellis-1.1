@@ -24,7 +24,6 @@ server {
     proxy_cache_bypass $http_upgrade;
   }
 
-  # Serve React or other static files
   location / {
     root /usr/share/nginx/html;
     index index.html;
