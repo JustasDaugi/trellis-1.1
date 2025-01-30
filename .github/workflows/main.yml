@@ -59,7 +59,7 @@ jobs:
         run: npm run build -w=server
 
       - name: Start server for E2E tests
-        run: npm run dev -w=server &
+        run: npm run dev -w=server
 
       - name: Build front end for E2E tests
         run: npm run build -w=client
