@@ -12,6 +12,7 @@ const app = createApp(database)
 const httpServer = createServer(app)
 
 export const io = new SocketIOServer(httpServer, {
+  path: "/socket.io/",
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
