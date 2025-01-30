@@ -154,7 +154,7 @@ jobs:
                 "80": "HTTP"
               },
               "environment": {
-                "API_PROXY_PASS": "http://localhost:3000",
+                "API_PROXY_PASS": "http://localhost:3000"
               }
             },
             "server": {
