@@ -3,24 +3,29 @@ FROM node:20.14.0-alpine3.20 AS builder
 WORKDIR /app
 
 COPY package*.json ./
-COPY client/package*.json client/
-COPY server/package*.json server/
+
+COPY server/package*.json ./server/
 
 RUN npm ci
 
-COPY . .  
+COPY . .
+
+WORKDIR /app/server
+RUN npm run build
+
+FROM node:20.14.0-alpine3.20 AS runner
+
+WORKDIR /app
+
+COPY --from=builder /app/server/dist ./server/dist
+
+COPY server/package*.json ./server/
 
 WORKDIR /app/server
 
-RUN npm run build
+RUN npm ci --production
 
-RUN npm run migrate:latest:prod || echo "Migrations failed, continuing..."
-
+ENV PORT=3000
 EXPOSE 3000
-
-ENV HOST 0.0.0.0
-ENV PORT 3000
-
-RUN ls -l /app/server/dist || echo "No compiled server files found!"
 
 CMD ["node", "dist/index.js"]
