@@ -9,6 +9,7 @@ jobs:
       VITE_API_ORIGIN: http://localhost:3000
       VITE_API_PATH: /api/v1/trpc
       DATABASE_URL: postgres://justas:justas@localhost:5432/trello
+      MONGO_URI: mongodb://localhost:27017
     services:
       postgres:
         image: postgres:16.1-alpine
