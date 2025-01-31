@@ -10,11 +10,17 @@ import BoardDropdown from '../components/BoardView/Board/BoardDropdown.vue'
 import AddCard from '../components/AddCard.vue'
 import CardActions from '../components/BoardView/Card/CardActions.vue'
 import { useBackgroundImage } from '@/utils/fetchImage'
-import type { ListPublic, BoardPublic, CardPublic } from '@server/shared/types'
-
-type ListCards = ListPublic & {
-  cards: CardPublic[]
-}
+import { fetchLists, cardDueDates } from '@/utils/fetchLists'
+import type { CardPublic } from '@server/shared/types'
+import {
+  board,
+  lists,
+  handleListDelete,
+  handleCardDelete,
+  logActivity,
+  createCard,
+  renderList,
+} from '@/utils/utils'
 
 export type UpdateCardPayload = {
   updatedField: string
@@ -26,11 +32,8 @@ export type UpdateCardPayload = {
 
 const route = useRoute()
 const router = useRouter()
-const board = ref<BoardPublic | null>(null)
-const lists = ref<ListCards[]>([])
 const selectedCard = ref<CardPublic | null>(null)
 const showDialog = ref(false)
-const cardDueDates = ref<Record<number, string | null>>({})
 
 const boardId = Number(route.params.id)
 const userId = ref<number | null>(authUserId.value)
@@ -49,7 +52,7 @@ onBeforeMount(async () => {
       const user = await trpc.user.findById.query({ id: userId.value })
       userFirstName.value = user?.firstName || null
 
-      await fetchLists()
+      await fetchLists(boardId, lists.value)
     } else {
       console.error('User ID is not available.')
     }
@@ -57,102 +60,6 @@ onBeforeMount(async () => {
     console.error('Error initializing BoardView:', error)
   }
 })
-
-const fetchLists = async () => {
-  try {
-    const fetchedLists = await trpc.list.find.mutate({ boardId })
-    const listsWithCards: ListCards[] = fetchedLists.map((list: ListPublic) => ({
-      ...list,
-      cards: [],
-    }))
-    await Promise.all(
-      listsWithCards.map(async (list) => {
-        try {
-          const fetchedCards: CardPublic[] = await trpc.card.find.mutate({ listId: list.id })
-          list.cards = fetchedCards
-
-          await Promise.all(
-            fetchedCards.map(async (card) => {
-              const dueDate = await trpc.card.getDueDate.query({ id: card.id })
-              cardDueDates.value[card.id] = dueDate ? new Date(dueDate).toLocaleString() : null
-            })
-          )
-        } catch (error) {
-          console.error(`Error fetching cards for list ${list.id}:`, error)
-        }
-      })
-    )
-    lists.value = listsWithCards
-  } catch (error) {
-    console.error('Error fetching lists:', error)
-  }
-}
-
-const logActivity = async (
-  cardId: number | undefined,
-  listId: number,
-  userId: number,
-  action: 'created' | 'updated' | 'deleted',
-  entityType: 'card' | 'list',
-  localTitle?: string,
-  field?: string,
-  previousValue?: any,
-  newValue?: any,
-  previousDueDate?: string | null,
-  newDueDate?: string | null,
-) => {
-  try {
-    if (!board.value) {
-      throw new Error('Board is not loaded yet.')
-    }
-
-    const activity = await trpc.activity.format.query({
-      cardId: entityType === 'card' ? cardId : undefined,
-      listId,
-      boardId: board.value.id,
-      userId,
-    })
-
-    await trpc.activity.log.mutate({
-    cardId: cardId,
-    listId,
-    boardId: board.value.id,
-    userId,
-    action,
-    entityType,
-    localTitle: localTitle || activity.card?.title || activity.list?.title,
-    field,
-    previousValue,
-    newValue,
-    previousDueDate,
-    newDueDate,
-    description: '',
-    id: '',
-    timestamp: undefined
-})
-  } catch (error) {
-    console.error(`Error logging activity for ${action} ${entityType}:`, error)
-  }
-}
-
-const handleListDelete = async (listId: number) => {
-  try {
-    lists.value = lists.value.filter((list) => list.id !== listId)
-  } catch (error) {
-    console.error('Error deleting list:', error)
-  }
-}
-
-const handleCardDelete = async (cardId: number, listId: number) => {
-  try {
-    const list = lists.value.find((list) => list.id === listId)
-    if (list) {
-      list.cards = list.cards.filter((card) => card.id !== cardId)
-    }
-  } catch (error) {
-    console.error('Error deleting card:', error)
-  }
-}
 
 const handleUpdateCard = ({
   updatedField,
@@ -186,8 +93,20 @@ const handleCardUpdate = async (
   newDueDate?: string | null
 ) => {
   try {
+    const list = lists.value.find((lst) => lst.id === listId)
+    if (list) {
+      const card = list.cards.find((c) => c.id === cardId)
+      if (card) {
+        ;(card as any)[updatedField] = newValue
+
+        if (updatedField === 'dueDate') {
+          renderDueDate(cardId, newDueDate ?? null)
+        }
+      }
+    }
+
     if (userId.value !== null) {
-      await logActivity(
+      logActivity(
         cardId,
         listId,
         userId.value,
@@ -199,21 +118,15 @@ const handleCardUpdate = async (
         newValue,
         previousDueDate,
         newDueDate
-      )
+      ).catch((error) => console.error('Error logging activity:', error))
     }
-    await fetchLists()
   } catch (error) {
     console.error('Error handling card update:', error)
   }
 }
 
-const renderList = (newList: ListPublic) => {
-  lists.value.push({ ...newList, cards: [] })
-  if (userId.value !== null) {
-    logActivity(undefined, newList.id, userId.value, 'created', 'list', newList.title).catch(
-      (error) => console.error('Error logging list creation:', error)
-    )
-  }
+const renderDueDate = (cardId: number, dueDate: string | null) => {
+  cardDueDates.value[cardId] = dueDate ? new Date(dueDate).toLocaleString() : null
 }
 
 function navigateToMainView() {
@@ -221,20 +134,6 @@ function navigateToMainView() {
 }
 
 const { backgroundImageUrl } = useBackgroundImage(board)
-
-const createCard = (listId: number, card: CardPublic) => {
-  const list = lists.value.find((lst) => lst.id === listId)
-  if (list) {
-    list.cards.push(card)
-    if (userId.value !== null) {
-      logActivity(card.id, listId, userId.value, 'created', 'card', card.title).catch((error) =>
-        console.error('Error logging card creation:', error)
-      )
-    }
-  } else {
-    console.error(`List with ID ${listId} not found`)
-  }
-}
 
 const openCardDialog = (card: CardPublic) => {
   selectedCard.value = null
@@ -247,6 +146,34 @@ const openCardDialog = (card: CardPublic) => {
 const closeCardDialog = () => {
   selectedCard.value = null
   showDialog.value = false
+}
+
+const handleListTitleUpdate = async (listId: number, newTitle: string) => {
+  try {
+    const list = lists.value.find((lst) => lst.id === listId)
+    if (list) {
+      const previousTitle = list.title
+      list.title = newTitle
+
+      if (userId.value !== null) {
+        logActivity(
+          undefined,
+          listId,
+          userId.value,
+          'updated',
+          'list',
+          newTitle,
+          'title',
+          previousTitle,
+          newTitle
+        ).catch((error) => console.error('Error logging list title update:', error))
+      }
+    } else {
+      console.error(`List with ID ${listId} not found.`)
+    }
+  } catch (error) {
+    console.error('Error updating list title:', error)
+  }
 }
 </script>
 
@@ -307,7 +234,7 @@ const closeCardDialog = () => {
               class="absolute right-4 top-4 text-white focus:outline-none"
               :list="list"
               :board="board"
-              @change-name="(newName) => (list.title = newName)"
+              @change-name="(newName) => handleListTitleUpdate(list.id, newName)"
               @delete-list="() => handleListDelete(list.id)"
             />
             <draggable v-model="list.cards" group="cards" :animation="200" item-key="id">
