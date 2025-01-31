@@ -5,6 +5,7 @@ import find from './find'
 import update from './update'
 import addDueDate from './addDueDate'
 import getDueDate from './getDueDate'
+import deleteDueDate from './deleteDueDate'
 
 export default router({
   create,
@@ -13,4 +14,5 @@ export default router({
   update,
   addDueDate,
   getDueDate,
+  deleteDueDate,
 })

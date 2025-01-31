@@ -4,7 +4,7 @@ import { defineProps, defineEmits } from 'vue'
 import { trpc } from '@/trpc'
 import useErrorMessage from '@/composables/useErrorMessage'
 import Buttons from './Buttons.vue'
-import StartDate from './DueDate.vue'
+import DueDate from './DueDate.vue'
 import type { CardPublic } from '@server/shared/types'
 import type { UpdateCardPayload } from '@/views/BoardView.vue'
 
@@ -19,11 +19,8 @@ const emit = defineEmits<{
 
 const isDialogOpen = ref(true)
 const isDeleteMessageVisible = ref(false)
-
 const showStartDateModal = ref(false)
-
 const selectedDueDate = ref<Date | null>(props.card.dueDate)
-
 const cardTitle = ref(props.card.title)
 const cardDescription = ref(props.card.description || '')
 
@@ -42,7 +39,6 @@ const [updateCard, updateErrorMessage] = useErrorMessage(async () => {
   if (cardTitle.value.trim()) {
     const previousTitle = props.card.title
     const previousDescription = props.card.description || ''
-
     const updates: { title?: string; description?: string } = {}
 
     if (cardTitle.value.trim() !== previousTitle) {
@@ -60,21 +56,6 @@ const [updateCard, updateErrorMessage] = useErrorMessage(async () => {
         updatedField: 'description',
         previousValue: previousDescription,
         newValue: cardDescription.value.trim(),
-      })
-    }
-
-    const previousDueDate = props.card.dueDate
-      ? new Date(props.card.dueDate).toLocaleString()
-      : null
-    const newDueDate = selectedDueDate.value ? selectedDueDate.value.toLocaleString() : null
-
-    if (previousDueDate !== newDueDate) {
-      emit('update-card', {
-        updatedField: 'dueDate',
-        previousValue: undefined,
-        newValue: undefined,
-        previousDueDate,
-        newDueDate,
       })
     }
 
@@ -98,12 +79,24 @@ const [deleteCard, deleteErrorMessage] = useErrorMessage(async () => {
   emit('delete-card')
   closeDialog()
 })
+
 async function confirmDelete() {
   await deleteCard()
 }
+
 function toggleDeleteMessage() {
   isDeleteMessageVisible.value = !isDeleteMessageVisible.value
 }
+
+const [removeDueDate, removeDueDateError] = useErrorMessage(async () => {
+  await trpc.card.deleteDueDate.mutate({ id: props.card.id })
+  selectedDueDate.value = null
+  emit('update-card', {
+    updatedField: 'dueDate',
+    previousValue: props.card.dueDate,
+    newValue: null,
+  })
+})
 
 const [addToCalendar, addToCalendarErrorMessage] = useErrorMessage(async () => {
   if (!selectedDueDate.value) {
@@ -120,6 +113,7 @@ const [addToCalendar, addToCalendarErrorMessage] = useErrorMessage(async () => {
     window.location.href = result.authUrl
   }
 })
+
 async function confirmAddToCalendar() {
   try {
     await addToCalendar()
@@ -127,9 +121,14 @@ async function confirmAddToCalendar() {
     console.error('Error adding to calendar:', error)
   }
 }
-
 function handleStartDateDone(newStartDate: Date | null) {
   selectedDueDate.value = newStartDate
+  emit('update-card', {
+    updatedField: 'dueDate',
+    previousValue: props.card.dueDate,
+    newValue: newStartDate,
+  })
+  props.card.dueDate = newStartDate
   showStartDateModal.value = false
 }
 
@@ -168,13 +167,21 @@ function closeStartDateModal() {
               ></textarea>
             </label>
 
-            <div class="mb-4">
+            <div class="mb-4 flex items-center justify-between">
               <button
                 type="button"
-                class="w-full border border-gray-300 py-2 text-center text-sm font-medium text-blue-700"
+                class="w-5/6 border border-gray-300 py-2 text-center text-sm font-medium text-blue-700"
                 @click="showStartDateModal = true"
               >
-                {{ startDateButtonText }}
+                <span class="pl-12">{{ startDateButtonText }}</span>
+              </button>
+              <button
+                v-if="selectedDueDate"
+                type="button"
+                class="flex w-1/6 items-center justify-center text-gray-500 hover:text-red-500"
+                @click="removeDueDate"
+              >
+                ✖
               </button>
             </div>
 
@@ -193,6 +200,9 @@ function closeStartDateModal() {
             </p>
             <p v-if="updateErrorMessage" class="mb-4 text-sm text-red-500">
               {{ updateErrorMessage }}
+            </p>
+            <p v-if="removeDueDateError" class="mb-4 text-sm text-red-500">
+              {{ removeDueDateError }}
             </p>
           </div>
 
@@ -214,7 +224,7 @@ function closeStartDateModal() {
       </div>
     </transition>
 
-    <StartDate
+    <DueDate
       v-if="showStartDateModal"
       :cardId="props.card.id"
       :initialDueDate="props.card.dueDate"
