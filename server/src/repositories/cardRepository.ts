@@ -72,6 +72,15 @@ export function cardRepository(db: Database) {
 
       return result?.dueDate ? new Date(result.dueDate) : null
     },
+
+    async deleteDueDate(id: number): Promise<CardPublic> {
+      return db
+        .updateTable('card')
+        .set({ dueDate: null })
+        .where('id', '=', id)
+        .returning(cardKeysPublic)
+        .executeTakeFirstOrThrow()
+    },
   }
 }
 
