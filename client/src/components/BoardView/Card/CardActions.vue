@@ -128,7 +128,6 @@ function handleStartDateDone(newStartDate: Date | null) {
     previousValue: props.card.dueDate,
     newValue: newStartDate,
   })
-  props.card.dueDate = newStartDate
   showStartDateModal.value = false
 }
 
