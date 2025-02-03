@@ -16,7 +16,10 @@ export const activitySchema = z.object({
   description: z.string(),
   previousDueDate: z.string().nullable().optional(),
   newDueDate: z.string().nullable().optional(),
-  timestamp: z.date().optional()
+  timestamp: z.date().optional(),
+  listTitle: z.string(),
+  boardTitle: z.string(),
+  userFirstName: z.string(),
 })
 
 export const activityKeysAll = Object.keys(activitySchema.shape)
