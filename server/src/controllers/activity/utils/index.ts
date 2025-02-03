@@ -5,12 +5,12 @@ export type LogInput = Omit<Log, 'timestamp'>
 
 export function generateDescription(input: LogInput): string {
   const {
-    userId,
+    userFirstName,
     action,
     entityType,
     localTitle,
-    listId,
-    boardId,
+    listTitle,
+    boardTitle,
     field,
     previousValue,
     newValue,
@@ -22,17 +22,17 @@ export function generateDescription(input: LogInput): string {
     field === 'dueDate' &&
     (previousDueDate !== undefined || newDueDate !== undefined)
   ) {
-    return `User ${userId} ${action} the due date from "${
+    return `User ${userFirstName} ${action} the due date from "${
       previousDueDate ?? 'none'
-    }" to "${newDueDate ?? 'none'}" in a ${entityType} titled "${localTitle}" in list ID ${listId}`
+    }" to "${newDueDate ?? 'none'}" in a ${entityType} titled "${localTitle}" in list "${listTitle}" on board "${boardTitle}"`
   } else if (field) {
     const changePart =
       previousValue !== undefined && newValue !== undefined
         ? `from "${previousValue}" to "${newValue}"`
         : ''
-    return `User ${userId} ${action} ${field} ${changePart} in a ${entityType} titled "${localTitle}" in list ID ${boardId}`
+    return `User ${userFirstName} ${action} ${field} ${changePart} in a ${entityType} titled "${localTitle}" in list "${listTitle}" on board "${boardTitle}"`
   }
-  return `User ${userId} ${action} a ${entityType} titled "${localTitle}" in board ID ${boardId}`
+  return `User ${userFirstName} ${action} a ${entityType} titled "${localTitle}" in board "${boardTitle}"`
 }
 
 export function buildLog(input: LogInput, description: string): Log {
@@ -49,6 +49,9 @@ export function buildLog(input: LogInput, description: string): Log {
     newValue,
     previousDueDate,
     newDueDate,
+    userFirstName,
+    boardTitle,
+    listTitle,
   } = input
 
   return {
@@ -66,6 +69,9 @@ export function buildLog(input: LogInput, description: string): Log {
     newDueDate: newDueDate ?? null,
     description,
     timestamp: new Date(),
+    userFirstName,
+    boardTitle,
+    listTitle,
   }
 }
 
