@@ -16,6 +16,9 @@ export type Log = {
   readonly timestamp: Date
   readonly previousDueDate?: string | null
   readonly newDueDate?: string | null
+  readonly userFirstName: string
+  readonly boardTitle: string
+  readonly listTitle: string
 }
 
 export interface DB {
