@@ -3,6 +3,7 @@ import provideRepos from '@server/trpc/provideRepos'
 import { cardRepository } from '@server/repositories/cardRepository'
 import { listRepository } from '@server/repositories/listRepository'
 import { userRepository } from '@server/repositories/userRepository'
+import { boardRepository } from '@server/repositories/boardRepository'
 import { publicProcedure } from '@server/trpc'
 import NotFoundError from '@server/utils/errors/NotFound'
 
@@ -12,6 +13,7 @@ export default publicProcedure
       cardRepository,
       listRepository,
       userRepository,
+      boardRepository,
     })
   )
   .input(
@@ -24,6 +26,11 @@ export default publicProcedure
   )
   .query(
     async ({ input: { cardId, listId, boardId, userId }, ctx: { repos } }) => {
+      const board = await repos.boardRepository.findById(boardId)
+      if (!board) {
+        throw new NotFoundError(`Board with ID ${boardId} not found.`)
+      }
+
       const lists = await repos.listRepository.findByBoardId(boardId)
       const foundList = lists.find((l) => l.id === listId)
       if (!foundList) {
@@ -53,9 +60,11 @@ export default publicProcedure
         list: {
           title: foundList.title,
         },
+        board: {
+          title: board.title,
+        },
         user: {
           firstName: user.firstName,
-          lastName: user.lastName,
         },
       }
     }
