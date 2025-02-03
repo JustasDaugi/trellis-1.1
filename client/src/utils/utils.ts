@@ -55,14 +55,19 @@ export const logActivity = async (
       userId,
     })
 
+    const userFirstName = activity.user.firstName
+    const listTitle = activity.list.title
+    const boardTitle = activity.board.title
+    const resolvedLocalTitle = localTitle || activity.card?.title || activity.list?.title
+
     await trpc.activity.log.mutate({
-      cardId: cardId,
+      cardId,
       listId,
       boardId: board.value.id,
       userId,
       action,
       entityType,
-      localTitle: localTitle || activity.card?.title || activity.list?.title,
+      localTitle: resolvedLocalTitle,
       field,
       previousValue,
       newValue,
@@ -71,6 +76,9 @@ export const logActivity = async (
       description: '',
       id: '',
       timestamp: undefined,
+      listTitle,
+      boardTitle,
+      userFirstName,
     })
   } catch (error) {
     console.error(`Error logging activity for ${action} ${entityType}:`, error)
