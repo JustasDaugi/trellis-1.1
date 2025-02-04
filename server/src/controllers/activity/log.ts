@@ -7,9 +7,9 @@ import {
   type LogInput,
 } from './utils'
 
-import { io } from '@server/socket'
+import { socketIO } from '@server/socket'
 import { slackBot } from '../../service/slackBot'
-import logger from '@server/utils//logger/logger'
+import logger from '@server/utils/logger/logger'
 
 export default publicProcedure
   .input(activitySchema)
@@ -28,8 +28,8 @@ export default publicProcedure
         logger.error({ err: slackError }, 'Error sending Slack message')
       }
 
-      if (io) {
-        io.emit('logCreated', logEntry)
+      if (socketIO.io) {
+        socketIO.io.emit('logCreated', logEntry)
       }
 
       return { success: true, message: 'Activity logged successfully' }
