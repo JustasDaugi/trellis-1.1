@@ -34,6 +34,16 @@ export function userRepository(db: Database) {
         .where('id', '=', id)
         .executeTakeFirst()
     },
+
+    async resetPassword(email: string, newPassword: string): Promise<boolean> {
+      const result = await db
+        .updateTable('user')
+        .set({ password: newPassword })
+        .where('email', '=', email)
+        .executeTakeFirst()
+
+      return result.numUpdatedRows > 0
+    },
   }
 }
 
