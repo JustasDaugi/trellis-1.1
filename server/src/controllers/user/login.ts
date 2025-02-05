@@ -30,7 +30,6 @@ export default publicProcedure
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password)
-
     if (!passwordMatch) {
       throw new UnauthorizedError('Incorrect credentials. Please try again.')
     }
