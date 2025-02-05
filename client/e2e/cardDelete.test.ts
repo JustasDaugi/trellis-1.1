@@ -3,7 +3,7 @@ import { asUser } from './utils/api'
 import { fakeUser, fakeBoard, fakeList, fakeCard } from './utils/fakeData'
 
 test.describe.serial('Delete a card in a list', () => {
-  const user = fakeUser({ password: 'password.123' })
+  const user = fakeUser({ password: 'Password.123!' })
   const board = fakeBoard()
   const list = fakeList()
   const card = fakeCard()
