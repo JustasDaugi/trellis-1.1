@@ -173,6 +173,7 @@ jobs:
                 "TOKEN_KEY": "${{ secrets.PROD_TOKEN_KEY }}",
                 "GMAIL_USER": "${{ secrets.GMAIL_USER }}",
                 "GMAIL_PASS": "${{ secrets.GMAIL_PASS }}",
+                "RESET_APP_PASS": "${{ secrets.RESET_APP_PASS }}",
                 "DOMAIN_LINK": "${{ vars.DOMAIN_LINK }}",
                 "CLIENT_ID": "${{ secrets.CLIENT_ID }}",
                 "CLIENT_SECRET": "${{ secrets.CLIENT_SECRET }}",
