@@ -7,12 +7,12 @@ import userRouter from '..'
 
 const createCaller = createCallerFactory(userRouter)
 const db = await wrapInRollbacks(createTestDatabase())
-const PASSWORD_CORRECT = 'password.123'
+const PASSWORD_CORRECT = 'Password.123!'
 
 const [userSeed] = await insertAll(db, 'user', [
   fakeUser({
     email: 'existing@user.com',
-    password: '$2b$10$sD53fzWIQBjXWfSDzuwmMOyY1ZAygLpRZlLxxPhcNG5r9BFWrNaDC',
+    password: '$2b$10$FWjtmWY4xcPGx5KwYoyJH.s/UsY0ykvdqKE6KU7N0yNQJtryPx9qu',
   }),
 ])
 
@@ -35,7 +35,7 @@ it('should throw an error for non-existant user', async () => {
       email: 'nonexisting@user.com',
       password: PASSWORD_CORRECT,
     })
-  ).rejects.toThrow() // some error
+  ).rejects.toThrow()
 })
 
 it('should throw an error for incorrect password', async () => {
@@ -44,7 +44,7 @@ it('should throw an error for incorrect password', async () => {
       email: userSeed.email,
       password: 'password.123!',
     })
-  ).rejects.toThrow(/credentials/i)
+  ).rejects.toThrow(/password/i)
 })
 
 it('throws an error for invalid email', async () => {
@@ -77,8 +77,62 @@ it('allows logging in with different email case', async () => {
 it('allows logging in with surrounding white space', async () => {
   await expect(
     login({
-      email: ` \t ${userSeed.email}\t `, // tabs and spaces
+      email: ` \t ${userSeed.email}\t `,
       password: PASSWORD_CORRECT,
     })
   ).resolves.toEqual(expect.anything())
+})
+
+it('should reject a password longer than 64 characters', async () => {
+  await expect(
+    login({
+      email: userSeed.email,
+      password: 'A'.repeat(65),
+    })
+  ).rejects.toThrow(/password/)
+})
+
+it('should reject a password without an uppercase letter', async () => {
+  await expect(
+    login({
+      email: userSeed.email,
+      password: 'lowercase123!',
+    })
+  ).rejects.toThrow(/password/)
+})
+
+it('should reject a password without a lowercase letter', async () => {
+  await expect(
+    login({
+      email: userSeed.email,
+      password: 'UPPERCASE123!',
+    })
+  ).rejects.toThrow(/password/)
+})
+
+it('should reject a password without a number', async () => {
+  await expect(
+    login({
+      email: userSeed.email,
+      password: 'NoNumbers!',
+    })
+  ).rejects.toThrow(/password/)
+})
+
+it('should reject a password without a special character', async () => {
+  await expect(
+    login({
+      email: userSeed.email,
+      password: 'NoSpecial123',
+    })
+  ).rejects.toThrow(/password/)
+})
+
+it('should reject a password with spaces', async () => {
+  await expect(
+    login({
+      email: userSeed.email,
+      password: 'With Spaces1!',
+    })
+  ).rejects.toThrow(/password/)
 })
