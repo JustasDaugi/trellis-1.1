@@ -15,13 +15,8 @@ export const authUserId = computed(() =>
 
 export const isLoggedIn = computed(() => !!authToken.value)
 
-// Exported API procedures.
-/**
- * Log in a user and store the access token in the store and in the local storage.
- */
 export async function login(userLogin: { email: string; password: string }) {
   const { accessToken } = await trpc.user.login.mutate(userLogin)
-
   authToken.value = accessToken
   storeAccessToken(localStorage, accessToken)
 }
@@ -32,3 +27,11 @@ export function logout() {
 }
 
 export const signup = trpc.user.signup.mutate
+
+export async function sendResetLink(email: string) {
+  return trpc.user.sendResetLink.mutate({ email })
+}
+
+export async function resetPassword(email: string, password: string, token: string) {
+  return trpc.user.resetPassword.mutate({ email, password, token })
+}
