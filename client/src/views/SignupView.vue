@@ -5,6 +5,7 @@ import PageForm from '@/components/PageForm.vue'
 import { FwbAlert, FwbButton, FwbInput } from 'flowbite-vue'
 import { DEFAULT_SERVER_ERROR } from '@/consts'
 import AlertError from '@/components/AlertError.vue'
+import PasswordCheck from '@/components/PasswordCheck.vue'
 
 const userForm = ref({
   email: '',
@@ -14,8 +15,9 @@ const userForm = ref({
 })
 
 const hasSucceeded = ref(false)
-
 const errorMessage = ref('')
+const showPasswordCheck = ref(false)
+
 async function submitSignup() {
   try {
     await signup(userForm.value)
@@ -23,6 +25,15 @@ async function submitSignup() {
     hasSucceeded.value = true
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : DEFAULT_SERVER_ERROR
+  }
+}
+
+const handlePasswordFocus = () => {
+  showPasswordCheck.value = true
+}
+const handlePasswordBlur = () => {
+  if (!userForm.value.password) {
+    showPasswordCheck.value = false
   }
 }
 </script>
@@ -62,16 +73,22 @@ async function submitSignup() {
         autocomplete="current-password"
         v-model="userForm.password"
         :required="true"
+        @focus="handlePasswordFocus"
+        @blur="handlePasswordBlur"
       />
+
+      <PasswordCheck v-if="showPasswordCheck" :password="userForm.password" />
 
       <FwbAlert v-if="hasSucceeded" data-testid="successMessage" type="success">
         You have successfully signed up! You can now log in.
         <RouterLink
           to="/login"
           class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-          >Go to the login page</RouterLink
         >
+          Go to the login page
+        </RouterLink>
       </FwbAlert>
+
       <AlertError :message="errorMessage">
         {{ errorMessage }}
       </AlertError>
@@ -84,12 +101,12 @@ async function submitSignup() {
     <template #footer>
       <FwbAlert class="bg-transparent text-center">
         Already a member?
-        {{ ' ' }}
         <RouterLink
           to="/login"
           class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-          >Log in</RouterLink
         >
+          Log in
+        </RouterLink>
         <br />
         or go
         <RouterLink to="/" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
