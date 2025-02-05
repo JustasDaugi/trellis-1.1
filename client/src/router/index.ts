@@ -21,6 +21,17 @@ const router = createRouter({
       component: () => import('../views/SignupView.vue'),
     },
     {
+      path: '/reset-password',
+      name: 'SendResetView',
+      component: () => import('../views/SendResetView.vue'),
+    },
+    {
+      path: '/reset-password/confirm',
+      name: 'ResetPasswordView',
+      component: () => import('../views/ResetPasswordView.vue'),
+      props: (route) => ({ token: route.query.token }),
+    },
+    {
       path: '/board/:id',
       name: 'Board',
       component: () => import('../views/BoardView.vue'),
