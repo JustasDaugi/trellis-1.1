@@ -50,7 +50,16 @@ const [submitLogin, errorMessage] = useErrorMessage(async () => {
       </FwbAlert>
 
       <div class="grid">
-        <FwbButton color="default" type="submit" size="xl">Log in</FwbButton>
+        <FwbButton color="default" type="submit" size="xl"> Log in </FwbButton>
+      </div>
+
+      <div class="mt-2 text-center">
+        <RouterLink
+          to="/reset-password"
+          class="text-lg font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+        >
+          Forgot your password?
+        </RouterLink>
       </div>
     </template>
 
