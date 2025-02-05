@@ -6,9 +6,8 @@ import { boardSchema } from '@server/entities/board'
 import { userSchema } from '@server/entities/user'
 import { z } from 'zod'
 import NotFoundError from '@server/utils/errors/NotFound'
-import InternalServerError from "@server/utils/errors/InternalServerError";
+import InternalServerError from '@server/utils/errors/InternalServerError'
 import sendEmail from '@server/service/email'
-
 
 const shareBoardInput = z.object({
   boardId: boardSchema.pick({ id: true }).shape.id,
@@ -45,6 +44,6 @@ export default publicProcedure
       await sendEmail(email, boardLink)
       return { success: true }
     } catch (error) {
-      throw new InternalServerError("Failed to send email")
+      throw new InternalServerError('Failed to send email')
     }
   })
