@@ -24,11 +24,12 @@ const schema = z
         if (isDevTest) {
           return 'supersecretkey'
         }
-
         throw new Error('You must provide a TOKEN_KEY in a production env!')
       }),
       expiresIn: z.string().default('7d'),
       passwordCost: z.coerce.number().default(isDevTest ? 6 : 12),
+
+      resetPasswordExpiresIn: z.string().default('15m'),
     }),
 
     database: z.object({
@@ -46,6 +47,7 @@ const config = schema.parse({
     tokenKey: env.TOKEN_KEY,
     expiresIn: env.TOKEN_EXPIRES_IN,
     passwordCost: env.PASSWORD_COST,
+    resetPasswordExpiresIn: env.RESET_PASSWORD_EXPIRES_IN,
   },
 
   database: {
@@ -59,6 +61,5 @@ function coerceBoolean(value: unknown) {
   if (typeof value === 'string') {
     return value === 'true' || value === '1'
   }
-
   return undefined
 }
