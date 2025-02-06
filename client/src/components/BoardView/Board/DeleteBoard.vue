@@ -81,13 +81,3 @@ defineExpose({
     </div>
   </div>
 </template>
-
-<style scoped>
-.border-orchid-500 {
-  border-color: #9d4edd;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>
