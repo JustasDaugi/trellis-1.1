@@ -1,5 +1,6 @@
 import { boardRepository } from '@server/repositories/boardRepository'
 import { userRepository } from '@server/repositories/userRepository'
+import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
 import { publicProcedure } from '@server/trpc'
 import provideRepos from '@server/trpc/provideRepos'
 import { boardSchema } from '@server/entities/board'
@@ -15,11 +16,11 @@ const shareBoardInput = z.object({
 })
 
 export default publicProcedure
-
   .use(
     provideRepos({
       boardRepository,
       userRepository,
+      boardMemberRepository,
     })
   )
   .input(shareBoardInput)
@@ -27,19 +28,21 @@ export default publicProcedure
     const { boardId, email } = input
 
     const board = await repos.boardRepository.findById(boardId)
-
     if (!board) {
       throw new NotFoundError('Board not found')
     }
 
     const user = await repos.userRepository.findByEmail(email)
-
     if (!user) {
       throw new NotFoundError('User not found')
     }
 
-    const boardLink = `${process.env.DOMAIN_LINK}/board/${boardId}`
+    await repos.boardMemberRepository.addBoardMember({
+      boardId: board.id,
+      userId: user.id,
+    })
 
+    const boardLink = `${process.env.DOMAIN_LINK}/board/${boardId}`
     try {
       await sendEmail(email, boardLink)
       return { success: true }
