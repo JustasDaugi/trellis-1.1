@@ -24,13 +24,17 @@ const boardOwnerId = ref<number | null>(null)
 
 const fetchBoardMembers = async () => {
   try {
-    boardMembers.value = await trpc.board.getBoardMembers.query({ boardId: props.boardId })
-    const ownerResponse = await trpc.board.getBoardOwner.query(props.boardId)
-    boardOwnerId.value = ownerResponse.boardOwnerId
+    const members = await trpc.board.getBoardMembers.query({ boardId: props.boardId });
+    
+    boardMembers.value = members.filter((member): member is BoardMember => member !== null);
+
+    const ownerResponse = await trpc.board.getBoardOwner.query(props.boardId);
+    boardOwnerId.value = ownerResponse.boardOwnerId;
   } catch (error) {
-    console.error('Failed to fetch board members:', error)
+    console.error('Failed to fetch board members:', error);
   }
-}
+};
+
 
 const refreshMembers = async () => {
   await fetchBoardMembers()
