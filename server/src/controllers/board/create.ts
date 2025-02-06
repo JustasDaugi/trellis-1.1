@@ -3,6 +3,7 @@ import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import { boardRepository } from '@server/repositories/boardRepository'
 import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
+import type { InsertableBoardMember } from '@server/repositories/boardMemberRepository'
 
 export default authenticatedProcedure
   .use(provideRepos({ boardRepository, boardMemberRepository }))
@@ -16,7 +17,6 @@ export default authenticatedProcedure
         selectedBackground: true,
       })
   )
-
   .mutation(
     async ({
       input: { title, selectedBackground },
@@ -30,10 +30,14 @@ export default authenticatedProcedure
 
       const createdBoard = await repos.boardRepository.create(newBoard)
 
-      await repos.boardMemberRepository.addBoardMember({
+      const boardMember: InsertableBoardMember = {
         boardId: createdBoard.id,
         userId: authUser.id,
-      })
+      }
+
+      await repos.boardMemberRepository.addBoardMember(boardMember)
+
+      await repos.boardMemberRepository.addOwner(createdBoard.id, authUser.id)
 
       return createdBoard as BoardPublic
     }
