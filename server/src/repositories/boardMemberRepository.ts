@@ -5,11 +5,13 @@ import {
 } from '@server/entities/boardMember'
 import type { Insertable } from 'kysely'
 
+export type InsertableBoardMember = Omit<Insertable<BoardMembers>, 'boardOwner'>
+
 export function boardMemberRepository(db: Database) {
   return {
     async addBoardMember(
-      boardMember: Insertable<BoardMembers>
-    ): Promise<BoardMembersPublic | undefined> {
+      boardMember: InsertableBoardMember
+    ): Promise<Partial<BoardMembersPublic> | undefined> {
       const existing = await db
         .selectFrom('boardMembers')
         .selectAll()
@@ -41,6 +43,38 @@ export function boardMemberRepository(db: Database) {
         .execute()
 
       return rows
+    },
+
+    async removeBoardMemberById(
+      boardId: number,
+      userId: number
+    ): Promise<boolean> {
+      const result = await db
+        .deleteFrom('boardMembers')
+        .where('boardId', '=', boardId)
+        .where('userId', '=', userId)
+        .executeTakeFirst()
+
+      return result.numDeletedRows > 0
+    },
+
+    async addOwner(boardId: number, userId: number): Promise<void> {
+      await db
+        .updateTable('boardMembers')
+        .set({ boardOwner: userId })
+        .where('boardId', '=', boardId)
+        .execute()
+    },
+
+    async getBoardOwner(boardId: number): Promise<number | null> {
+      const result = await db
+        .selectFrom('boardMembers')
+        .select(['boardOwner'])
+        .where('boardId', '=', boardId)
+        .where('boardOwner', 'is not', null)
+        .executeTakeFirst()
+
+      return result?.boardOwner ?? null
     },
   }
 }

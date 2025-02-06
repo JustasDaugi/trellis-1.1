@@ -18,6 +18,7 @@ export interface Board {
 
 export interface BoardMembers {
   boardId: number
+  boardOwner: number | null
   userId: number
 }
 

@@ -6,13 +6,13 @@ import { idSchema } from './shared'
 export const boardMembersSchema = z.object({
   boardId: idSchema,
   userId: idSchema,
+  boardOwner: idSchema.optional(),
 })
 
-export const boardMembersKeysAll = Object.keys(
-  boardMembersSchema.shape
-) as (keyof BoardMembers)[]
-
-export const boardMembersKeysPublic = boardMembersKeysAll
+export const boardMembersKeysPublic = [
+  'boardId',
+  'userId',
+] as (keyof BoardMembers)[]
 
 export type BoardMembersPublic = Pick<
   Selectable<BoardMembers>,

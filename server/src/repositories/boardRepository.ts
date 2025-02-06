@@ -5,11 +5,22 @@ import type { Insertable, Updateable } from 'kysely'
 export function boardRepository(db: Database) {
   return {
     async create(board: Insertable<Board>): Promise<BoardPublic> {
-      return db
+      const createdBoard = await db
         .insertInto('board')
         .values(board)
         .returning(boardKeysPublic)
         .executeTakeFirstOrThrow()
+
+      await db
+        .insertInto('boardMembers')
+        .values({
+          boardId: createdBoard.id,
+          userId: board.userId,
+          boardOwner: board.userId,
+        })
+        .execute()
+
+      return createdBoard
     },
 
     async findById(id: number): Promise<BoardPublic | undefined> {

@@ -3,6 +3,7 @@ import UpdateBoard from './UpdateBoard.vue'
 import DeleteBoard from './DeleteBoard.vue'
 import ShareBoard from '@/components/BoardView/Board/ShareBoard.vue'
 import ActivityModal from './ActivityModal.vue'
+import BoardMembers from '@/components/BoardView/Board/ViewBoardMembers.vue'
 import type { BoardPublic } from '@server/shared/types'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
@@ -18,6 +19,7 @@ const emit = defineEmits<{
 
 const isOpen = ref(false)
 const isActivityModalOpen = ref(false)
+const isBoardMembersModalOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 const deleteBoardRef = ref<InstanceType<typeof DeleteBoard> | null>(null)
 
@@ -43,6 +45,15 @@ const changeName = (newName: string) => {
 const openActivityModal = () => {
   isActivityModalOpen.value = true
   closeDropdown()
+}
+
+const openBoardMembersModal = () => {
+  isBoardMembersModalOpen.value = true
+  closeDropdown()
+}
+
+const closeBoardMembersModal = () => {
+  isBoardMembersModalOpen.value = false
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -87,6 +98,12 @@ onBeforeUnmount(() => {
       >
         View Activity
       </button>
+      <button
+        @click="openBoardMembersModal"
+        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+      >
+        View Members
+      </button>
       <ShareBoard :boardId="props.board.id" @cancel="closeDropdown" />
       <button
         @click="onDelete"
@@ -106,6 +123,12 @@ onBeforeUnmount(() => {
       v-model:isOpen="isActivityModalOpen"
       :board="props.board"
       :userId="props.userId"
+    />
+
+    <BoardMembers
+      v-if="isBoardMembersModalOpen"
+      :boardId="props.board.id"
+      @close="closeBoardMembersModal"
     />
   </div>
 </template>
