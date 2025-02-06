@@ -9,6 +9,9 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('user_id', 'integer', (col) =>
       col.notNull().references('user.id').onDelete('cascade')
     )
+    .addColumn('board_owner', 'integer', (col) =>
+      col.references('user.id').onDelete('cascade')
+    )
     .addPrimaryKeyConstraint('board_members_pkey', ['board_id', 'user_id'])
     .execute()
 }
