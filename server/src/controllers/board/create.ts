@@ -2,24 +2,26 @@ import { boardSchema, type BoardPublic } from '@server/entities/board'
 import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import { boardRepository } from '@server/repositories/boardRepository'
+import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
 
 export default authenticatedProcedure
-  .use(provideRepos({ boardRepository }))
-
+  .use(provideRepos({ boardRepository, boardMemberRepository }))
   .input(
-    boardSchema.pick({
-      title: true,
-      selectedBackground: true,
-    }).partial({
-      selectedBackground: true,
-    })
+    boardSchema
+      .pick({
+        title: true,
+        selectedBackground: true,
+      })
+      .partial({
+        selectedBackground: true,
+      })
   )
 
   .mutation(
     async ({
       input: { title, selectedBackground },
       ctx: { authUser, repos },
-    }): Promise<BoardPublic> => {
+    }) => {
       const newBoard = {
         title,
         selectedBackground: selectedBackground || null,
@@ -28,6 +30,11 @@ export default authenticatedProcedure
 
       const createdBoard = await repos.boardRepository.create(newBoard)
 
-      return createdBoard
+      await repos.boardMemberRepository.addBoardMember({
+        boardId: createdBoard.id,
+        userId: authUser.id,
+      })
+
+      return createdBoard as BoardPublic
     }
   )
