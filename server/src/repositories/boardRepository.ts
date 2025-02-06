@@ -30,13 +30,42 @@ export function boardRepository(db: Database) {
         .executeTakeFirst()
     },
 
+    /**
+     * Return all boards the user owns
+     * plus any boards in which the user is a member.
+     */
     async findAllByUserId(userId: number): Promise<BoardPublic[]> {
-      return db
-        .selectFrom('board')
-        .select(boardKeysPublic)
-        .where('userId', '=', userId)
-        .orderBy('id', 'desc')
-        .execute()
+      const [ownedBoards, pivotRows] = await Promise.all([
+        db
+          .selectFrom('board')
+          .select(boardKeysPublic)
+          .where('userId', '=', userId)
+          .orderBy('id', 'desc')
+          .execute(),
+
+        db
+          .selectFrom('boardMembers')
+          .select('boardId')
+          .where('userId', '=', userId)
+          .execute(),
+      ])
+
+      const pivotBoardIds = pivotRows.map((row) => row.boardId)
+      const memberBoards = pivotBoardIds.length
+        ? await db
+            .selectFrom('board')
+            .select(boardKeysPublic)
+            .where('id', 'in', pivotBoardIds)
+            .orderBy('id', 'desc')
+            .execute()
+        : []
+
+      const boards = [...ownedBoards, ...memberBoards].reduce(
+        (boardMap, board) => boardMap.set(board.id, board),
+        new Map<number, BoardPublic>()
+      )
+
+      return Array.from(boards.values())
     },
 
     async update(
