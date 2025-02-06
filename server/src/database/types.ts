@@ -16,6 +16,11 @@ export interface Board {
   userId: number
 }
 
+export interface BoardMembers {
+  boardId: number
+  userId: number
+}
+
 export interface BoardTemplate {
   createdAt: Generated<Timestamp>
   id: Generated<number>
@@ -77,6 +82,7 @@ export interface User {
 
 export interface DB {
   board: Board
+  boardMembers: BoardMembers
   boardTemplate: BoardTemplate
   card: Card
   cardTemplate: CardTemplate
