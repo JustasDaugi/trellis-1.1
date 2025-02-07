@@ -9,6 +9,7 @@ import path from 'path';
 
 const s3 = new S3Client({
   region: config.s3.region,
+  endpoint: `https://${config.s3.bucketName}.s3.${config.s3.region}.amazonaws.com`,
   credentials: {
     accessKeyId: config.s3.accessKeyId,
     secretAccessKey: config.s3.secretAccessKey,
