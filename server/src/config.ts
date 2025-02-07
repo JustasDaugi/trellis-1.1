@@ -34,10 +34,10 @@ const schema = z
     }),
 
     s3: z.object({
-      region: z.string().default('us-east-1'),
-      accessKeyId: z.string().min(1),
-      secretAccessKey: z.string().min(1),
-      bucketName: z.string().min(1),
+      region: z.string(),
+      accessKeyId: z.string(),
+      secretAccessKey: z.string(),
+      bucketName: z.string(),
     }),
   })
   .readonly()
