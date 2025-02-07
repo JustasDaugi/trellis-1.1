@@ -1,4 +1,3 @@
-// addList.test.ts
 import { test, expect } from '@playwright/test'
 import { asUser } from './utils/api'
 import { fakeBoard, fakeUser, fakeList } from './utils/fakeData'
