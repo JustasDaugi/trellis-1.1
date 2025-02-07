@@ -15,7 +15,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
-
+      REDIS_HOST: localhost
     services:
       postgres:
         image: postgres:16.1-alpine
@@ -109,7 +109,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ vars.AWS_REGION }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
-
+      REDIS_HOST: ${{ vars.REDIS_HOST }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -202,7 +202,8 @@ jobs:
                 "S3_BUCKET_NAME": "${{ vars.S3_BUCKET_NAME }}",
                 "AWS_ACCESS_KEY_ID": "'"${{ env.AWS_ACCESS_KEY_ID }}"'",
                 "AWS_SECRET_ACCESS_KEY": "'"${{ env.AWS_SECRET_ACCESS_KEY }}"'",
-                "AWS_REGION": "'"${{ env.AWS_REGION }}"'"
+                "AWS_REGION": "'"${{ env.AWS_REGION }}"'",
+                "REDIS_HOST": "${{ env.REDIS_HOST }}"  # <--- Added Redis endpoint for production
               }
             }
           }' > containers.json
