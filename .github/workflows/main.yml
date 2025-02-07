@@ -180,7 +180,8 @@ jobs:
                 "REDIRECT_URI": "${{ vars.REDIRECT_URI }}",
                 "SLACK_BOT_TOKEN": "${{ secrets.SLACK_BOT_TOKEN }}",
                 "SLACK_CHANNEL_ID": "${{ secrets.SLACK_CHANNEL_ID }}",
-                "MONGO_URI": "'"${{ vars.MONGO_URI }}"'"
+                "MONGO_URI": "'"${{ vars.MONGO_URI }}"'",
+                "S3_BUCKET_NAME": "${{ vars.S3_BUCKET_NAME }}"
               }
             }
           }' > containers.json
