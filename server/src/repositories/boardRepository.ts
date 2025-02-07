@@ -45,13 +45,19 @@ export function boardRepository(db: Database) {
      * Return all boards the user owns
      * plus any boards in which the user is a member.
      */
-    async findAllByUserId(userId: number): Promise<BoardPublic[]> {
+    async findAllByUserId(
+      userId: number,
+      limit: number,
+      offset: number
+    ): Promise<BoardPublic[]> {
       const [ownedBoards, pivotRows] = await Promise.all([
         db
           .selectFrom('board')
           .select(boardKeysPublic)
           .where('userId', '=', userId)
           .orderBy('id', 'desc')
+          .limit(limit)
+          .offset(offset)
           .execute(),
 
         db
@@ -68,6 +74,8 @@ export function boardRepository(db: Database) {
             .select(boardKeysPublic)
             .where('id', 'in', pivotBoardIds)
             .orderBy('id', 'desc')
+            .limit(limit)
+            .offset(offset)
             .execute()
         : []
 
@@ -76,7 +84,7 @@ export function boardRepository(db: Database) {
         new Map<number, BoardPublic>()
       )
 
-      return Array.from(boards.values())
+      return Array.from(boards.values()).slice(0, limit)
     },
 
     async update(
