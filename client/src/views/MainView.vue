@@ -37,7 +37,14 @@ const fetchBoards = async () => {
   }
 
   try {
-    boards.value = await trpc.board.findAll.query({ userId: authUserId.value })
+    const fetchedBoards = (await trpc.board.findAll.query({
+      userId: authUserId.value,
+    })) as BoardPublic[]
+    boards.value = fetchedBoards.map((board) => ({
+      ...board,
+      createdAt: new Date(board.createdAt),
+      updatedAt: new Date(board.updatedAt),
+    }))
   } catch (error) {
     console.error('Failed to fetch boards:', error)
   }
