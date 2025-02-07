@@ -127,7 +127,6 @@ jobs:
           docker build
           -t $SERVER_IMAGE_TAG
           -f ./server/Dockerfile .
-          --build-arg MONGO_URI=${{ env.MONGO_URI }} # Pass MONGO_URI as a build arg
 
       - name: Build client image
         run: >-
