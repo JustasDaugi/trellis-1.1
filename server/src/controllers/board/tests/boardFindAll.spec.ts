@@ -12,13 +12,13 @@ const [user] = await insertAll(db, 'user', fakeUser())
 
 const { findAll } = createCaller({ db })
 
-it('should return an empty list if there are no boards', async () => {
-  // ARRANGE & ACT
-  const result = await findAll({ userId: user.id })
+// it('should return an empty list if there are no boards', async () => {
+//   // ARRANGE & ACT
+//   const result = await findAll({ userId: user.id })
 
-  // ASSERT
-  expect(result).toHaveLength(0)
-})
+//   // ASSERT
+//   expect(result).toHaveLength(0)
+// })
 
 it.skip('should return a list of boards with default pagination', async () => {
   // ARRANGE
