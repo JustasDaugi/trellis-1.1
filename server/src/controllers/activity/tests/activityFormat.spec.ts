@@ -64,7 +64,7 @@ describe('format procedure', () => {
   it('should throw NotFoundError when board is not found', async () => {
     const repos = {
       ...baseRepos,
-      boardRepository: { findById: async (id: number) => null },
+      boardRepository: { findById: async () => null },
     }
     const { format } = createCaller(authRepoContext(repos))
     const input = { boardId, listId, userId, cardId }
@@ -76,7 +76,7 @@ describe('format procedure', () => {
   it('should throw NotFoundError when list is not found', async () => {
     const repos = {
       ...baseRepos,
-      listRepository: { findByBoardId: async (id: number) => [] },
+      listRepository: { findByBoardId: async () => [] },
     }
     const { format } = createCaller(authRepoContext(repos))
     const input = { boardId, listId, userId, cardId }
@@ -90,7 +90,7 @@ describe('format procedure', () => {
   it('should throw NotFoundError when user is not found', async () => {
     const repos = {
       ...baseRepos,
-      userRepository: { findById: async (id: number) => null },
+      userRepository: { findById: async () => null },
     }
     const { format } = createCaller(authRepoContext(repos))
     const input = { boardId, listId, userId, cardId }
@@ -102,7 +102,7 @@ describe('format procedure', () => {
   it('should throw NotFoundError when card is not found and cardId is provided', async () => {
     const repos = {
       ...baseRepos,
-      cardRepository: { findByListId: async (id: number) => [] },
+      cardRepository: { findByListId: async () => [] },
     }
     const { format } = createCaller(authRepoContext(repos))
     const input = { boardId, listId, userId, cardId }
