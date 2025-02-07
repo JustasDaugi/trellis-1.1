@@ -1,5 +1,8 @@
 import { WebClient } from '@slack/web-api'
-import { generateDescription, type LogInput } from '@server/controllers/activity/utils'
+import {
+  generateDescription,
+  type LogInput,
+} from '@server/controllers/activity/utils'
 
 export class SlackBot {
   private slackClient: WebClient
