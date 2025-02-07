@@ -4,9 +4,7 @@ import { z } from 'zod'
 const { env } = process
 
 if (!env.NODE_ENV) env.NODE_ENV = 'development'
-
-// force UTC timezone
-env.TZ = 'UTC'
+env.TZ = 'UTC' // Force UTC timezone
 
 const isTest = env.NODE_ENV === 'test'
 const isDevTest = env.NODE_ENV === 'development' || isTest
@@ -28,12 +26,18 @@ const schema = z
       }),
       expiresIn: z.string().default('7d'),
       passwordCost: z.coerce.number().default(isDevTest ? 6 : 12),
-
       resetPasswordExpiresIn: z.string().default('15m'),
     }),
 
     database: z.object({
       connectionString: z.string().url(),
+    }),
+
+    s3: z.object({
+      region: z.string().default('us-east-1'),
+      accessKeyId: z.string().nonempty(),
+      secretAccessKey: z.string().nonempty(),
+      bucketName: z.string().nonempty(),
     }),
   })
   .readonly()
@@ -52,6 +56,13 @@ const config = schema.parse({
 
   database: {
     connectionString: env.DATABASE_URL,
+  },
+
+  s3: {
+    region: env.AWS_REGION,
+    accessKeyId: env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    bucketName: env.S3_BUCKET_NAME,
   },
 })
 
