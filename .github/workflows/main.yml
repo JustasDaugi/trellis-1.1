@@ -6,6 +6,7 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     env:
+      NODE_OPTIONS: --max-old-space-size=4096
       VITE_API_ORIGIN: http://localhost:3000
       VITE_API_PATH: /api/v1/trpc
       DATABASE_URL: postgres://justas:justas@localhost:5432/trello
