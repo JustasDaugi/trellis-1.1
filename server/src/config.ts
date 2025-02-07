@@ -35,9 +35,9 @@ const schema = z
 
     s3: z.object({
       region: z.string().default('us-east-1'),
-      accessKeyId: z.string().nonempty(),
-      secretAccessKey: z.string().nonempty(),
-      bucketName: z.string().nonempty(),
+      accessKeyId: z.string().min(1),
+      secretAccessKey: z.string().min(1),
+      bucketName: z.string().min(1),
     }),
   })
   .readonly()
