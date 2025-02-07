@@ -13,7 +13,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+      AWS_S3_BUCKET_NAME: ${{ vars.AWS_S3_BUCKET_NAME }}
 
     services:
       postgres:
@@ -98,7 +98,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ vars.AWS_REGION }}
-      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+      AWS_S3_BUCKET_NAME: ${{ vars.AWS_S3_BUCKET_NAME }}
 
     steps:
       - name: Check out repository
@@ -190,7 +190,7 @@ jobs:
                 "SLACK_BOT_TOKEN": "${{ secrets.SLACK_BOT_TOKEN }}",
                 "SLACK_CHANNEL_ID": "${{ secrets.SLACK_CHANNEL_ID }}",
                 "MONGO_URI": "'"${{ vars.MONGO_URI }}"'",
-                "S3_BUCKET_NAME": "${{ vars.S3_BUCKET_NAME }}",
+                "AWS_S3_BUCKET_NAME": "${{ vars.AWS_S3_BUCKET_NAME }}",
                 "AWS_ACCESS_KEY_ID": "'"${{ env.AWS_ACCESS_KEY_ID }}"'",
                 "AWS_SECRET_ACCESS_KEY": "'"${{ env.AWS_SECRET_ACCESS_KEY }}"'",
                 "AWS_REGION": "'"${{ env.AWS_REGION }}"'"
