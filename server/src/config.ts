@@ -4,7 +4,7 @@ import { z } from 'zod'
 const { env } = process
 
 if (!env.NODE_ENV) env.NODE_ENV = 'development'
-env.TZ = 'UTC' // Force UTC timezone
+env.TZ = 'UTC'
 
 const isTest = env.NODE_ENV === 'test'
 const isDevTest = env.NODE_ENV === 'development' || isTest
