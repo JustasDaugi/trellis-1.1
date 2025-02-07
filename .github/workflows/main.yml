@@ -10,6 +10,11 @@ jobs:
       VITE_API_PATH: /api/v1/trpc
       DATABASE_URL: postgres://justas:justas@localhost:5432/trello
       MONGO_URI: mongodb://localhost:27017
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
     services:
       postgres:
         image: postgres:16.1-alpine
