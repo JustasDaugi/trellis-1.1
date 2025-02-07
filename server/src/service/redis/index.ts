@@ -1,8 +1,10 @@
 import { createClient } from 'redis'
 
+const redisHost = process.env.REDIS_HOST
+
 const redisClient = createClient({
   socket: {
-    host: 'localhost',
+    host: redisHost,
     port: 6379,
   },
 })
@@ -25,8 +27,8 @@ export const getCache = async <T>(key: string): Promise<T | null> => {
 
 /**
  * Sets a value in the Redis cache with a given TTL.
- * @param key - cache key.
- * @param value - value that is cached.
+ * @param key - Cache key.
+ * @param value - Value to cache.
  * @param ttl - Time-to-live in seconds.
  */
 export const setCache = async (
