@@ -8,10 +8,10 @@ COPY server/package*.json server/
 RUN npm ci
 
 COPY server/ ./server/
-
 WORKDIR /app/server
 RUN npm run build
 
+COPY server/config/redis/redis.conf /etc/redis/redis.conf
 EXPOSE 3000
 
 CMD ["npm", "run", "prod"]
