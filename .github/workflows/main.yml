@@ -49,6 +49,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug environment variables
+        run: |
+          echo "VITE_API_ORIGIN=${{ env.VITE_API_ORIGIN }}"
+          echo "VITE_API_PATH=${{ env.VITE_API_PATH }}"
+          echo "DATABASE_URL=${{ env.DATABASE_URL }}"
+          echo "MONGO_URI=${{ env.MONGO_URI }}"
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}"
+          echo "S3_BUCKET_NAME=${{ env.S3_BUCKET_NAME }}"
+          echo "REDIS_HOST=${{ env.REDIS_HOST }}"
+          echo "VITE_REDIS_HOST=${{ env.VITE_REDIS_HOST }}"
+          echo "VITE_REDIS_PORT=${{ env.VITE_REDIS_PORT }}"
+
       - name: Type check server
         run: npm run typecheck -w=server
 
