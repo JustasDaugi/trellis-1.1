@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: justas
       POSTGRES_DB: trello
     ports:
-      - "5432"
+      - "5432:5432"
     volumes:
       - trello:/var/lib/postgresql/data
 
@@ -22,6 +22,11 @@ services:
     volumes:
       - mongodata:/data/db
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
   server:
     build:
       context: .
@@ -29,13 +34,14 @@ services:
     environment:
       DATABASE_URL: postgres://justas:justas@postgres:5432/trello
       MONGO_URI: mongodb://root:example@mongo:27017
-
       PORT: 3000
+      REDIS_HOST: redis
     ports:
-      - "3000"
+      - "3000:3000"
     depends_on:
       - postgres
       - mongo
+      - redis
 
   client:
     build:
