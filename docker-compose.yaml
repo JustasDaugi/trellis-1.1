@@ -25,13 +25,12 @@ services:
   redis:
     image: redis:latest
     volumes:
-      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./config/redis/redis.crt:/usr/local/etc/redis/redis.crt
-      - ./config/redis/redis.key:/usr/local/etc/redis/redis.key
-      - ./config/redis/ca.crt:/usr/local/etc/redis/ca.crt
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
       - "6380:6380"
+    networks:
+      - default
 
   server:
     build:
@@ -41,8 +40,6 @@ services:
       DATABASE_URL: postgres://justas:justas@postgres:5432/trello
       MONGO_URI: mongodb://root:example@mongo:27017
       PORT: 3000
-      REDIS_HOST: redis
-      REDIS_PORT: 6380
     ports:
       - "3000:3000"
     depends_on:
