@@ -178,8 +178,8 @@ jobs:
               },
               "environment": {
                 "API_PROXY_PASS": "http://localhost:3000",
-                "VITE_SOCKET_URL": "'"${{ env.VITE_SOCKET_URL }}"'"
-                "VITE_REDIS_HOST": "'"${{ env.VITE_REDIS_HOST }}"'"
+                "VITE_SOCKET_URL": "'"${{ env.VITE_SOCKET_URL }}"'",
+                "VITE_REDIS_HOST": "'"${{ env.VITE_REDIS_HOST }}"'",
                 "VITE_REDIS_PORT": "'"${{ env.VITE_REDIS_PORT }}"'"
               }
             },
