@@ -1,27 +1,33 @@
-import { createClient } from 'redis'
+import { createClient } from 'redis';
 
-const redisHost = process.env.REDIS_HOST || 'redis'
+const rawHost = process.env.REDIS_HOST || 'redis';
 
-const pubClient = createClient({
-  url: `rediss://${redisHost}:6379`
-});
+let redisUrl: string;
+if (rawHost.startsWith('redis://') || rawHost.startsWith('rediss://')) {
+  // Use the host value as-is if it already includes a protocol.
+  redisUrl = rawHost;
+} else {
+  // Otherwise, add the rediss protocol and port.
+  redisUrl = `rediss://${rawHost}:6379`;
+}
 
+const pubClient = createClient({ url: redisUrl });
 
 pubClient.on('error', (err) => {
-  console.error('Redis error:', err)
-})
+  console.error('Redis error:', err);
+});
 
-pubClient.connect().catch(console.error)
+pubClient.connect().catch(console.error);
 
 export const getCache = async <T>(key: string): Promise<T | null> => {
   try {
-    const data = await pubClient.get(key)
-    return data ? (JSON.parse(data) as T) : null
+    const data = await pubClient.get(key);
+    return data ? (JSON.parse(data) as T) : null;
   } catch (error) {
-    console.error('Error retrieving cache:', error)
-    return null
+    console.error('Error retrieving cache:', error);
+    return null;
   }
-}
+};
 
 export const setCache = async (
   key: string,
@@ -29,8 +35,8 @@ export const setCache = async (
   ttl: number
 ): Promise<void> => {
   try {
-    await pubClient.setEx(key, ttl, JSON.stringify(value))
+    await pubClient.setEx(key, ttl, JSON.stringify(value));
   } catch (error) {
-    console.error('Error setting cache:', error)
+    console.error('Error setting cache:', error);
   }
-}
+};
