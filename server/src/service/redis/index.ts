@@ -41,12 +41,6 @@
 //   }
 // };
 
-
-
-
-
-
-
 import { createClient } from 'redis'
 
 const redisHost = process.env.REDIS_HOST
@@ -85,5 +79,3 @@ export const setCache = async (
     console.error('Error setting cache:', error)
   }
 }
-
-
