@@ -3,11 +3,9 @@ import { createClient } from 'redis'
 const redisHost = process.env.REDIS_HOST || 'redis'
 
 const pubClient = createClient({
-  socket: {
-    host: redisHost,
-    port: 6379,
-  },
-})
+  url: `rediss://${redisHost}:6379`
+});
+
 
 pubClient.on('error', (err) => {
   console.error('Redis error:', err)
