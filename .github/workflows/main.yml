@@ -110,6 +110,8 @@ jobs:
       AWS_REGION: ${{ vars.AWS_REGION }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
       REDIS_HOST: ${{ vars.REDIS_HOST }}
+      VITE_REDIS_HOST: ${{ vars.VITE_REDIS_HOST }}
+      VITE_REDIS_PORT: ${{ vars.VITE_REDIS_PORT }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -177,6 +179,8 @@ jobs:
               "environment": {
                 "API_PROXY_PASS": "http://localhost:3000",
                 "VITE_SOCKET_URL": "'"${{ env.VITE_SOCKET_URL }}"'"
+                "VITE_REDIS_HOST": "'"${{ env.VITE_REDIS_HOST }}"'"
+                "VITE_REDIS_PORT": "'"${{ env.VITE_REDIS_PORT }}"'"
               }
             },
             "server": {
@@ -203,7 +207,9 @@ jobs:
                 "AWS_ACCESS_KEY_ID": "'"${{ env.AWS_ACCESS_KEY_ID }}"'",
                 "AWS_SECRET_ACCESS_KEY": "'"${{ env.AWS_SECRET_ACCESS_KEY }}"'",
                 "AWS_REGION": "'"${{ env.AWS_REGION }}"'",
-                "REDIS_HOST": "${{ vars.REDIS_HOST }}"
+                "REDIS_HOST": "${{ vars.REDIS_HOST }}",
+                "VITE_REDIS_HOST": "${{ vars.VITE_REDIS_HOST }}",
+                "VITE_REDIS_PORT": "${{ vars.VITE_REDIS_PORT }}",
               }
             }
           }' > containers.json
