@@ -33,12 +33,6 @@ const schema = z
       connectionString: z.string().url(),
     }),
 
-    s3: z.object({
-      region: z.string(),
-      accessKeyId: z.string(),
-      secretAccessKey: z.string(),
-      bucketName: z.string(),
-    }),
   })
   .readonly()
 
@@ -56,13 +50,6 @@ const config = schema.parse({
 
   database: {
     connectionString: env.DATABASE_URL,
-  },
-
-  s3: {
-    region: env.AWS_REGION,
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-    bucketName: env.S3_BUCKET_NAME,
   },
 })
 
