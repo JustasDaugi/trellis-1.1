@@ -16,6 +16,8 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
       REDIS_HOST: ${{ vars.REDIS_HOST }}
+      VITE_REDIS_HOST: ${{ vars.VITE_REDIS_HOST }}
+      VITE_REDIS_PORT: ${{ vars.VITE_REDIS_PORT }}
     services:
       postgres:
         image: postgres:16.1-alpine
