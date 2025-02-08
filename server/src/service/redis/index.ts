@@ -17,7 +17,6 @@ export const getCache = async <T>(key: string): Promise<T | null> => {
     const data = await redisClient.get(key);
     return data ? (JSON.parse(data) as T) : null;
   } catch (error) {
-    console.error('Error retrieving cache:', error);
     return null;
   }
 };
@@ -26,7 +25,6 @@ export const setCache = async (key: string, value: any, ttl: number): Promise<vo
   try {
     await redisClient.setEx(key, ttl, JSON.stringify(value));
   } catch (error) {
-    console.error('Error setting cache:', error);
   }
 };
 
