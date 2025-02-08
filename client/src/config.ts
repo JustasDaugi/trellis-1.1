@@ -25,8 +25,8 @@ socket.on('connect', () => {
 })
 
 
-export const redisHost = (import.meta.env.VITE_REDIS_HOST as string) || window.location.origin
-export const redisPort = (import.meta.env.VITE_REDIS_PORT as string) || window.location.origin
+export const redisHost = (import.meta.env.VITE_REDIS_HOST as string)
+export const redisPort = (import.meta.env.VITE_REDIS_PORT as string)
 export const redisUrl = `redis://${redisHost}:${redisPort}`
 
 console.log(`Redis configuration: ${redisUrl}`)
