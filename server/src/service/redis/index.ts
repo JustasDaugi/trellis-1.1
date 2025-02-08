@@ -2,7 +2,8 @@ import { createClient } from 'redis';
 import logger from '@server/utils/logger/logger';
 
 const redisHost = process.env.REDIS_HOST || '127.0.0.1';
-const redisPort = process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379;
+const redisPort = process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379;
+
 
 const redisClient = createClient({
   socket: {
