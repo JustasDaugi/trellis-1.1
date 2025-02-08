@@ -209,7 +209,7 @@ jobs:
                 "AWS_REGION": "'"${{ env.AWS_REGION }}"'",
                 "REDIS_HOST": "${{ vars.REDIS_HOST }}",
                 "VITE_REDIS_HOST": "${{ vars.VITE_REDIS_HOST }}",
-                "VITE_REDIS_PORT": "${{ vars.VITE_REDIS_PORT }}",
+                "VITE_REDIS_PORT": "${{ vars.VITE_REDIS_PORT }}"
               }
             }
           }' > containers.json
