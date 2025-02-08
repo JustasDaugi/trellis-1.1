@@ -53,11 +53,9 @@ export default publicProcedure
     try {
       const cachedBoards = await getCache(cacheKey)
       if (cachedBoards) {
-        console.log('Serving from Redis cache')
         return cachedBoards
       }
     } catch (error) {
-      console.error('Error retrieving from cache:', error)
     }
     const boards = await repos.boardRepository.findAllByUserId(
       userId,
@@ -68,7 +66,6 @@ export default publicProcedure
     try {
       await setCache(cacheKey, boards, 60)
     } catch (error) {
-      console.error('Error setting cache:', error)
     }
 
     return boards
