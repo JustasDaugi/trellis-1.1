@@ -10,19 +10,7 @@ const redisClient = createClient({
   },
 });
 
-redisClient.on('error', (err) => {
-  console.error('Redis error:', err);
-});
 
-(async () => {
-  try {
-    console.log(`Connecting to Redis at ${redisHost}:${redisPort}`);
-    await redisClient.connect();
-    console.log('Redis connection established');
-  } catch (err) {
-    console.error('Failed to connect to Redis:', err);
-  }
-})();
 
 export const getCache = async <T>(key: string): Promise<T | null> => {
   try {
