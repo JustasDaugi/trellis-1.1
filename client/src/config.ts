@@ -30,3 +30,4 @@ export const redisPort = import.meta.env.VITE_REDIS_PORT ? Number(import.meta.en
 export const redisUrl = `redis://${redisHost}:${redisPort}`
 
 console.log(`Redis configuration: ${redisUrl}`)
+
