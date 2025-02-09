@@ -1,35 +1,30 @@
-import { createClient } from 'redis';
-import logger from '@server/utils/logger/logger';
-
-const redisHost = process.env.REDIS_HOST || '127.0.0.1';
-const redisPort = process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379;
+import { Redis } from '@upstash/redis'
+import config from '@server/config'
 
 
-const redisClient = createClient({
-  socket: {
-    host: redisHost,
-    port: redisPort,
-  },
-});
-
-redisClient.on('error', (err) => {
-  logger.error('error', `Redis error: ${err}`);
-});
+const redis = new Redis({
+  url: config.redis.url,
+  token: config.redis.token,
+})
 
 export const getCache = async <T>(key: string): Promise<T | null> => {
   try {
-    const data = await redisClient.get(key);
-    return data ? (JSON.parse(data) as T) : null;
+    const data = await redis.get(key)
+    return data ? (JSON.parse(data as string) as T) : null
   } catch (error) {
-    logger.error('error', `Error retrieving cache for key ${key}: ${error}`);
-    return null;
+    console.error('Error retrieving cache:', error)
+    return null
   }
-};
+}
 
-export const setCache = async (key: string, value: any, ttl: number): Promise<void> => {
+export const setCache = async (
+  key: string,
+  value: any,
+  ttl: number
+): Promise<void> => {
   try {
-    await redisClient.setEx(key, ttl, JSON.stringify(value));
+    await redis.set(key, JSON.stringify(value), { ex: ttl })
   } catch (error) {
-    logger.error('error', `Error setting cache for key ${key}: ${error}`);
+    console.error('Error setting cache:', error)
   }
-};
+}
