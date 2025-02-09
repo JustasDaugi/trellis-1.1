@@ -15,9 +15,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
-      REDIS_HOST: ${{ vars.REDIS_HOST }}
-      VITE_REDIS_HOST: ${{ vars.VITE_REDIS_HOST }}
-      VITE_REDIS_PORT: ${{ vars.VITE_REDIS_PORT }}
+      REDIS_URL: ${{ vars.REDIS_URL }}
+      REDIS_TOKEN: ${{ vars.REDIS_TOKEN }}
     services:
       postgres:
         image: postgres:16.1-alpine
@@ -58,9 +57,8 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
           echo "AWS_REGION=${{ secrets.AWS_REGION }}"
           echo "S3_BUCKET_NAME=${{ env.S3_BUCKET_NAME }}"
-          echo "REDIS_HOST=${{ env.REDIS_HOST }}"
-          echo "VITE_REDIS_HOST=${{ env.VITE_REDIS_HOST }}"
-          echo "VITE_REDIS_PORT=${{ env.VITE_REDIS_PORT }}"
+          echo "REDIS_URL=${{ env.REDIS_URL }}"
+          echo "REDIS_TOKEN=${{ env.REDIS_TOKEN }}"
 
       - name: Type check server
         run: npm run typecheck -w=server
@@ -124,9 +122,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ vars.AWS_REGION }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
-      REDIS_HOST: ${{ vars.REDIS_HOST }}
-      VITE_REDIS_HOST: ${{ vars.VITE_REDIS_HOST }}
-      VITE_REDIS_PORT: ${{ vars.VITE_REDIS_PORT }}
+      REDIS_URL: ${{ vars.REDIS_URL }}
+      REDIS_TOKEN: ${{ vars.REDIS_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -222,9 +219,8 @@ jobs:
                 "AWS_ACCESS_KEY_ID": "'"${{ env.AWS_ACCESS_KEY_ID }}"'",
                 "AWS_SECRET_ACCESS_KEY": "'"${{ env.AWS_SECRET_ACCESS_KEY }}"'",
                 "AWS_REGION": "'"${{ env.AWS_REGION }}"'",
-                "REDIS_HOST": "${{ vars.REDIS_HOST }}",
-                "VITE_REDIS_HOST": "${{ vars.VITE_REDIS_HOST }}",
-                "VITE_REDIS_PORT": "${{ vars.VITE_REDIS_PORT }}"
+                "REDIS_URL": "${{ vars.REDIS_URL }}",
+                "REDIS_TOKEN": "${{ vars.REDIS_TOKEN }}"
               }
             }
           }' > containers.json
