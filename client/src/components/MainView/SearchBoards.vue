@@ -21,8 +21,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="relative flex items-center space-x-4" @click.stop>
-    <span class="text-sm text-gray-400">Quick find</span>
+  <div class="flex items-center space-x-4" @click.stop>
+    <div
+      class="flex h-10 items-center overflow-hidden rounded-lg border border-gray-600 bg-gray-800 text-gray-300 shadow-md transition-all duration-300"
+      :class="{ 'w-64 px-4': isSearchOpen, 'w-0 px-0': !isSearchOpen }"
+    >
+      <input
+        v-if="isSearchOpen"
+        type="text"
+        placeholder="Search boards"
+        class="focus:ring-orchid-500 w-full bg-transparent text-sm text-white outline-none focus:ring-2"
+      />
+    </div>
     <button @click.stop="toggleSearch" class="p-2 focus:outline-none">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -39,20 +49,8 @@ onUnmounted(() => {
         />
       </svg>
     </button>
-    <div
-      class="absolute left-16 top-0 flex h-10 items-center rounded-lg border border-gray-600 bg-gray-800 text-gray-300 shadow-md transition-all duration-300"
-      :class="{ 'w-64 px-4': isSearchOpen, 'w-0 px-0': !isSearchOpen }"
-    >
-      <input
-        v-if="isSearchOpen"
-        type="text"
-        placeholder="Search boards"
-        class="focus:ring-orchid-500 w-full bg-transparent text-sm text-white outline-none focus:ring-2"
-      />
-    </div>
   </div>
 </template>
-
 <style scoped>
 .transition-all {
   transition: all 0.3s ease-in-out;
