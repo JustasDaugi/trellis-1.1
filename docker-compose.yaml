@@ -22,30 +22,17 @@ services:
     volumes:
       - mongodata:/data/db
 
-  redis:
-    image: redis:latest
-    volumes:
-      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    ports:
-      - "6380:6380"
-    networks:
-      - default
-
   server:
     build:
       context: .
       dockerfile: ./server/Dockerfile
-    environment:
-      DATABASE_URL: postgres://justas:justas@postgres:5432/trello
-      MONGO_URI: mongodb://root:example@mongo:27017
-      PORT: 3000
+    env_file:
+      - ./server/.env
     ports:
       - "3000:3000"
     depends_on:
       - postgres
       - mongo
-      - redis
 
   client:
     build:
