@@ -33,6 +33,11 @@ const schema = z
       connectionString: z.string().url(),
     }),
 
+    redis: z.object({
+      url: z.string().url(),
+      token: z.string()
+    })
+
   })
   .readonly()
 
@@ -51,6 +56,11 @@ const config = schema.parse({
   database: {
     connectionString: env.DATABASE_URL,
   },
+
+  redis: {
+    url: process.env.REDIS_URL,
+    token: process.env.REDIS_TOKEN,
+  }
 })
 
 export default config
