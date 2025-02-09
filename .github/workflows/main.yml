@@ -13,10 +13,10 @@ jobs:
       MONGO_URI: mongodb://localhost:27017
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
-      REDIS_URL: ${{ vars.REDIS_URL }}
-      REDIS_TOKEN: ${{ vars.REDIS_TOKEN }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}
     services:
       postgres:
         image: postgres:16.1-alpine
@@ -117,13 +117,13 @@ jobs:
     env:
       CLIENT_IMAGE_TAG: client-${{ github.sha }}
       SERVER_IMAGE_TAG: server-${{ github.sha }}
-      MONGO_URI: ${{ vars.MONGO_URI }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ vars.AWS_REGION }}
-      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
-      REDIS_URL: ${{ vars.REDIS_URL }}
-      REDIS_TOKEN: ${{ vars.REDIS_TOKEN }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -190,9 +190,7 @@ jobs:
               },
               "environment": {
                 "API_PROXY_PASS": "http://localhost:3000",
-                "VITE_SOCKET_URL": "'"${{ env.VITE_SOCKET_URL }}"'",
-                "VITE_REDIS_HOST": "'"${{ env.VITE_REDIS_HOST }}"'",
-                "VITE_REDIS_PORT": "'"${{ env.VITE_REDIS_PORT }}"'"
+                "VITE_SOCKET_URL": "'"${{ env.VITE_SOCKET_URL }}"'"
               }
             },
             "server": {
@@ -214,13 +212,13 @@ jobs:
                 "REDIRECT_URI": "${{ vars.REDIRECT_URI }}",
                 "SLACK_BOT_TOKEN": "${{ secrets.SLACK_BOT_TOKEN }}",
                 "SLACK_CHANNEL_ID": "${{ secrets.SLACK_CHANNEL_ID }}",
-                "MONGO_URI": "'"${{ vars.MONGO_URI }}"'",
-                "S3_BUCKET_NAME": "${{ vars.S3_BUCKET_NAME }}",
+                "MONGO_URI": "'"${{ secrets.MONGO_URI }}"'",
+                "S3_BUCKET_NAME": "${{ secrets.S3_BUCKET_NAME }}",
                 "AWS_ACCESS_KEY_ID": "'"${{ env.AWS_ACCESS_KEY_ID }}"'",
                 "AWS_SECRET_ACCESS_KEY": "'"${{ env.AWS_SECRET_ACCESS_KEY }}"'",
                 "AWS_REGION": "'"${{ env.AWS_REGION }}"'",
-                "REDIS_URL": "${{ vars.REDIS_URL }}",
-                "REDIS_TOKEN": "${{ vars.REDIS_TOKEN }}"
+                "REDIS_URL": "${{ secrets.REDIS_URL }}",
+                "REDIS_TOKEN": "${{ secrets.REDIS_TOKEN }}"
               }
             }
           }' > containers.json
