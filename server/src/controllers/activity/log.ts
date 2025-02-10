@@ -6,7 +6,6 @@ import {
   insertLog,
   type LogInput,
 } from './utils'
-
 import { socketIO } from '@server/socket'
 import { slackBot } from '../../service/slackBot'
 import logger from '@server/utils/logger/logger'
@@ -21,15 +20,15 @@ export default publicProcedure
 
       await insertLog(logEntry)
 
+      if (socketIO.io) {
+        socketIO.io.emit('logCreated', logEntry)
+      }
+
       try {
         await slackBot.sendDescription(logInput)
         logger.info('Slack message sent for new/updated log.')
       } catch (slackError) {
         logger.error({ err: slackError }, 'Error sending Slack message')
-      }
-
-      if (socketIO.io) {
-        socketIO.io.emit('logCreated', logEntry)
       }
 
       return { success: true, message: 'Activity logged successfully' }
