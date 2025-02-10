@@ -105,7 +105,6 @@ watch(logs, (newLogs) => {
 
 onMounted(() => {
   socket.on('logCreated', (logEntry: Activity) => {
-    console.log('Received logCreated event:', logEntry)
     if (Number(logEntry.boardId) === boardId) {
       logs.value.push(logEntry)
       console.log('New log added. Updated logs:', logs.value)
