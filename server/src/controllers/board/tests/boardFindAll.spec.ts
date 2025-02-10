@@ -12,15 +12,15 @@ const [user] = await insertAll(db, 'user', fakeUser())
 
 const { findAll } = createCaller({ db })
 
-// it('should return an empty list if there are no boards', async () => {
-//   // ARRANGE & ACT
-//   const result = await findAll({ userId: user.id })
+it('should return an empty list if there are no boards', async () => {
+  // ARRANGE & ACT
+  const result = await findAll({ userId: user.id })
 
-//   // ASSERT
-//   expect(result).toHaveLength(0)
-// })
+  // ASSERT
+  expect(result).toHaveLength(0)
+})
 
-it.skip('should return a list of boards with default pagination', async () => {
+it('should return a list of boards with default pagination', async () => {
   // ARRANGE
   await insertAll(db, 'board', [fakeBoard({ userId: user.id })])
 
@@ -33,19 +33,19 @@ it.skip('should return a list of boards with default pagination', async () => {
 
 
 
-// it('should return the latest board first', async () => {
-//   // ARRANGE
-//   const [boardOld] = await insertAll(db, 'board', [
-//     fakeBoard({ userId: user.id }),
-//   ])
-//   const [boardNew] = await insertAll(db, 'board', [
-//     fakeBoard({ userId: user.id }),
-//   ])
+it.skip('should return the latest board first', async () => {
+  // ARRANGE
+  const [boardOld] = await insertAll(db, 'board', [
+    fakeBoard({ userId: user.id }),
+  ])
+  const [boardNew] = await insertAll(db, 'board', [
+    fakeBoard({ userId: user.id }),
+  ])
 
-//   // ACT
-//   const boards = await findAll({ userId: user.id })
+  // ACT
+  const boards = await findAll({ userId: user.id })
 
-//   // ASSERT
-//   expect(boards[0]).toMatchObject(boardNew)
-//   expect(boards[1]).toMatchObject(boardOld)
-// })
+  // ASSERT
+  expect(boards[0]).toMatchObject(boardNew)
+  expect(boards[1]).toMatchObject(boardOld)
+})

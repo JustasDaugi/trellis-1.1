@@ -23,11 +23,3 @@ export const socket = io(socketUrl, {
 socket.on('connect', () => {
   console.log(`Client connected to Socket.IO server at ${socketUrl}`)
 })
-
-
-// export const redisHost = (import.meta.env.VITE_REDIS_HOST as string)
-// export const redisPort = (import.meta.env.VITE_REDIS_PORT as string)
-// export const redisUrl = `redis://${redisHost}:${redisPort}`
-
-// console.log(`Redis configuration: ${redisUrl}`)
-
