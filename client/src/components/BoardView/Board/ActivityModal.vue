@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, defineEmits, watch, onBeforeMount } from 'vue'
+import { ref, defineEmits, watch, onMounted, onUnmounted, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import { trpc } from '@/trpc'
+import { socket } from '../../../config'
 
 type ActivityAction = 'created' | 'updated' | 'deleted'
 type ActivityEntityType = 'card' | 'list'
@@ -60,6 +61,7 @@ const fetchLogs = async () => {
 
     if (response.success) {
       logs.value = response.logs as unknown as Activity[]
+      console.debug('Fetched logs:', logs.value)
     } else {
       errorMessage.value = 'Failed to fetch activity logs.'
     }
@@ -95,6 +97,26 @@ onBeforeMount(async () => {
   if (props.isOpen) {
     await fetchLogs()
   }
+})
+
+watch(logs, (newLogs) => {
+  console.log('Logs updated:', newLogs)
+})
+
+onMounted(() => {
+  socket.on('logCreated', (logEntry: Activity) => {
+    console.log('Received logCreated event:', logEntry)
+    if (Number(logEntry.boardId) === boardId) {
+      logs.value.push(logEntry)
+      console.log('New log added. Updated logs:', logs.value)
+    } else {
+      console.log('Received log does not belong to current board, ignoring:', logEntry)
+    }
+  })
+})
+
+onUnmounted(() => {
+  socket.off('logCreated')
 })
 </script>
 
