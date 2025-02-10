@@ -4,6 +4,8 @@
 
 trellis-1.1 is a project management application that allows users to create and manage boards, lists, and cards efficiently. With collaboration features, real-time activity logging, and user authentication and authorization, this application is designed to make teamwork easier.
 
+**Disclaimer**: This project is a continuation of the previous capstone project.
+
 ## Table of Contents
 
 - [Features](#features)
