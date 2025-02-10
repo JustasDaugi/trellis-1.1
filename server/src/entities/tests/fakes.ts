@@ -6,6 +6,7 @@ import type {
   Card,
   CardTemplate,
   User,
+  BoardMembers,
 } from '@server/database/types'
 import type { Insertable } from 'kysely'
 import { random } from '@tests/utils/random'
@@ -86,7 +87,6 @@ export const fakeCard = <T extends Partial<Insertable<Card>>>(overrides: T) =>
     ...overrides,
   }) satisfies Insertable<Card>
 
-
 /**
  * Generates a fake board template with default test data.
  * @param overrides Any properties that should be different from default fake data.
@@ -135,3 +135,17 @@ export const fakeCardTemplate = <T extends Partial<Insertable<CardTemplate>>>(
     updatedAt: new Date(),
     ...overrides,
   }) satisfies Insertable<CardTemplate>
+
+/**
+ * Generates a fake board member with default test data.
+ * @param overrides Any properties that should be different from default fake data.
+ */
+export const fakeBoardMember = <T extends Partial<Insertable<BoardMembers>>>(
+  overrides: T = {} as T
+) =>
+  ({
+    boardId: randomId(),
+    userId: randomId(),
+    boardOwner: null, // Default to null unless explicitly overridden
+    ...overrides,
+  }) satisfies Insertable<BoardMembers>
