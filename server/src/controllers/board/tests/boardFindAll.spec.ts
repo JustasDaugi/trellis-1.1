@@ -30,22 +30,3 @@ it('should return a list of boards with default pagination', async () => {
   // ASSERT
   expect(boards).toHaveLength(1)
 })
-
-
-
-it.skip('should return the latest board first', async () => {
-  // ARRANGE
-  const [boardOld] = await insertAll(db, 'board', [
-    fakeBoard({ userId: user.id }),
-  ])
-  const [boardNew] = await insertAll(db, 'board', [
-    fakeBoard({ userId: user.id }),
-  ])
-
-  // ACT
-  const boards = await findAll({ userId: user.id })
-
-  // ASSERT
-  expect(boards[0]).toMatchObject(boardNew)
-  expect(boards[1]).toMatchObject(boardOld)
-})

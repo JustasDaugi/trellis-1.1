@@ -1,6 +1,4 @@
-# Project Name
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+# Trellis-1.1
 
 ## Overview
 
