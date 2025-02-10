@@ -1,21 +1,28 @@
-import { Redis } from '@upstash/redis'
-import config from '@server/config'
-
+import { Redis } from '@upstash/redis';
+import config from '@server/config';
 
 const redis = new Redis({
   url: config.redis.url,
   token: config.redis.token,
-})
+});
 
 export const getCache = async <T>(key: string): Promise<T | null> => {
   try {
-    const data = await redis.get(key)
-    return data ? (JSON.parse(data as string) as T) : null
+    const data = await redis.get(key);
+    if (data) {
+      // eslint-disable-next-line no-console
+      console.log(`Cache hit for key: ${key}`);
+      return JSON.parse(data as string) as T;
+    }
+    // eslint-disable-next-line no-console
+    console.log(`Cache miss for key: ${key}`);
+    return null;
   } catch (error) {
-    console.error('Error retrieving cache:', error)
-    return null
+    // eslint-disable-next-line no-console
+    console.error('Error retrieving cache:', error);
+    return null;
   }
-}
+};
 
 export const setCache = async (
   key: string,
@@ -23,8 +30,11 @@ export const setCache = async (
   ttl: number
 ): Promise<void> => {
   try {
-    await redis.set(key, JSON.stringify(value), { ex: ttl })
+    await redis.set(key, JSON.stringify(value), { ex: ttl });
+    // eslint-disable-next-line no-console
+    console.log(`Cache set for key: ${key} with TTL: ${ttl}`);
   } catch (error) {
-    console.error('Error setting cache:', error)
+    // eslint-disable-next-line no-console
+    console.error('Error setting cache:', error);
   }
-}
+};
