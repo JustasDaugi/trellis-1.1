@@ -44,7 +44,8 @@ export default publicProcedure
     )
 
     try {
-      await setCache(cacheKey, boards, 60)
+      const CACHE_TTL = 5 * 60
+      await setCache(cacheKey, boards, CACHE_TTL)
     } catch (error) {
       logger.error('error', `Error setting cache for key ${cacheKey}: ${error}`)
     }
