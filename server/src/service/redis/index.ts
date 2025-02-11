@@ -7,10 +7,23 @@ const redis = new Redis({
   token: config.redis.token,
 })
 
-export const getCache = async <T>(key: string): Promise<T | null> => {
+export const getCache = async <T>(
+  key: string,
+  extendTTL?: number
+): Promise<T | null> => {
   try {
     const data = await redis.get(key)
     if (data) {
+      if (extendTTL) {
+        const currentTTL = await redis.ttl(key)
+        if (currentTTL !== null && currentTTL < extendTTL) {
+          const defaultTTL = extendTTL * 1.25
+          await redis.expire(key, defaultTTL)
+          logger.info(
+            `TTL refreshed for key: ${key}, extended by ${defaultTTL} seconds`
+          )
+        }
+      }
       return JSON.parse(data as string) as T
     }
     return null

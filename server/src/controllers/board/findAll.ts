@@ -26,7 +26,8 @@ export default publicProcedure
     const cacheKey = `boards:${userId}:limit:${limit}:offset:${offset}`
 
     try {
-      const cachedBoards = await getCache(cacheKey)
+      const EXTEND_TTL_THRESHOLD = 4 * 60
+      const cachedBoards = await getCache(cacheKey, EXTEND_TTL_THRESHOLD)
       if (cachedBoards) {
         return cachedBoards
       }

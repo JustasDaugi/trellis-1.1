@@ -21,7 +21,11 @@ export default publicProcedure
       const cacheKey = `lists:board:${boardId}`
 
       try {
-        const cachedLists = await getCache<ListPublic[]>(cacheKey)
+        const EXTEND_TTL_THRESHOLD = 4 * 60
+        const cachedLists = await getCache<ListPublic[]>(
+          cacheKey,
+          EXTEND_TTL_THRESHOLD
+        )
         if (cachedLists && Array.isArray(cachedLists)) {
           return cachedLists
         }
