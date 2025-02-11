@@ -32,7 +32,8 @@ export default publicProcedure
       const lists = await repos.listRepository.findByBoardId(boardId)
 
       try {
-        await setCache(cacheKey, lists, 60)
+        const CACHE_TTL = 5 * 60
+        await setCache(cacheKey, lists, CACHE_TTL)
       } catch (error) {
         logger.error('Error setting cache for key:', cacheKey, error)
       }
