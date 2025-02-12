@@ -5,6 +5,7 @@
 trellis-1.1 is a project management application that allows users to create and manage boards, lists, and cards efficiently. With collaboration features, real-time activity logging, and user authentication and authorization, this application is designed to make teamwork easier.
 
 **Disclaimer**: This project is a continuation of the previous capstone project.
+Project link: https://github.com/JustasDaugi/trellis
 
 ## Table of Contents
 
@@ -111,3 +112,6 @@ Server:
 npm run build -w server
 npm run start -w server
 ```
+
+## Project retrospective
+Link: https://docs.google.com/document/d/1MeZlNdtFmxfleUAkCUxbyh-ZJJHZTWSN/edit?usp=sharing&ouid=102069400217498636336&rtpof=true&sd=true
