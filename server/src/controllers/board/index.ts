@@ -8,6 +8,7 @@ import share from './share'
 import getBoardMembers from './getBoardMembers'
 import removeBoardMembers from './removeBoardMembers'
 import getBoardOwner from './getBoardOwner'
+import fetchData from './fetchData'
 
 export default router({
   create,
@@ -19,4 +20,5 @@ export default router({
   getBoardMembers,
   removeBoardMembers,
   getBoardOwner,
+  fetchData
 })
