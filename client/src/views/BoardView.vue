@@ -10,7 +10,7 @@ import BoardDropdown from '../components/BoardView/Board/BoardDropdown.vue'
 import AddCard from '../components/AddCard.vue'
 import CardActions from '../components/BoardView/Card/CardActions.vue'
 import { useBackgroundImage } from '@/utils/fetchImage'
-import { fetchLists, cardDueDates } from '@/utils/fetchLists'
+import { fetchLists } from '@/utils/fetchLists'
 import type { CardPublic } from '@server/shared/types'
 import {
   board,
@@ -32,12 +32,29 @@ export type UpdateCardPayload = {
 
 const route = useRoute()
 const router = useRouter()
-const selectedCard = ref<CardPublic | null>(null)
-const showDialog = ref(false)
-
 const boardId = Number(route.params.id)
+
 const userId = ref<number | null>(authUserId.value)
 const userFirstName = ref<string | null>(null)
+
+const cardDueDates = ref<Record<number, string | null>>({})
+
+function augmentListsData(listsData: any[]): any[] {
+  return listsData.map((list) => ({
+    ...list,
+    createdAt: list.createdAt || new Date(),
+    updatedAt: list.updatedAt || new Date(),
+    userId: list.userId ?? 0,
+    cards: (list.cards || []).map((card: any) => ({
+      ...card,
+      createdAt: card.createdAt || new Date(),
+      updatedAt: card.updatedAt || new Date(),
+      userId: card.userId ?? 0,
+      description: card.description ?? null,
+      dueDate: card.dueDate ?? null,
+    })),
+  }))
+}
 
 onBeforeMount(async () => {
   try {
@@ -52,7 +69,10 @@ onBeforeMount(async () => {
       const user = await trpc.user.findById.query({ id: userId.value })
       userFirstName.value = user?.firstName || null
 
-      await fetchLists(boardId, lists.value)
+      const fetchedListsData = await fetchLists(boardId)
+      const augmentedLists = augmentListsData(fetchedListsData)
+
+      lists.value.splice(0, lists.value.length, ...augmentedLists)
     } else {
       console.error('User ID is not available.')
     }
@@ -60,6 +80,9 @@ onBeforeMount(async () => {
     console.error('Error initializing BoardView:', error)
   }
 })
+
+const selectedCard = ref<CardPublic | null>(null)
+const showDialog = ref(false)
 
 const handleUpdateCard = ({
   updatedField,
