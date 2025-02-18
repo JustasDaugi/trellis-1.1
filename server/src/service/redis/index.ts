@@ -16,7 +16,7 @@ export const getCache = async <T>(
     if (data) {
       if (extendTTL) {
         const currentTTL = await redis.ttl(key)
-        if (currentTTL !== null && currentTTL < extendTTL) {
+        if (currentTTL !== undefined && currentTTL < extendTTL) {
           const defaultTTL = extendTTL * 1.25
           await redis.expire(key, defaultTTL)
           logger.info(
