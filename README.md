@@ -83,7 +83,7 @@ Project link: https://github.com/JustasDaugi/trellis
 - **Vitest**
 - **Playwright**
 
-
+### Installation
 1. `npm install`
 2. Create a PostgreSQL database (or use an existing one).
 3. Setup `.env` file in `server` based on `.env.example` file.
