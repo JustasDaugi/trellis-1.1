@@ -16,7 +16,7 @@ const emit = defineEmits<{
 const isLoading = ref(false)
 
 const buttonLabel = computed(() => {
-  return props.loggedInUserId === props.boardId ? 'Leave' : 'Remove'
+  return props.loggedInUserId === props.boardId ? 'Remove' : 'Leave'
 })
 
 const removeMember = async () => {
