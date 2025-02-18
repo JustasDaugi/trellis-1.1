@@ -81,6 +81,7 @@ Project link: https://github.com/JustasDaugi/trellis
 
 ### Testing
 - **Vitest**
+- **Playwright**
 
 
 1. `npm install`
