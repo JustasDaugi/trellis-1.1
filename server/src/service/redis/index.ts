@@ -26,10 +26,10 @@ export const getCache = async <T>(
       }
       return JSON.parse(data as string) as T
     }
-    return null
+    return undefined
   } catch (error) {
     logger.error('Error retrieving cache:', error)
-    return null
+    return undefined
   }
 }
 

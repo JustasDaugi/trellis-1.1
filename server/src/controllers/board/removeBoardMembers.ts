@@ -24,11 +24,14 @@ export default authenticatedProcedure
       const boardMembers =
         await repos.boardMemberRepository.getBoardMembers(boardId)
 
-      if (!boardMembers.some((member) => member.userId === userId)) {
+      const member = boardMembers.find((member) => member.userId === userId)
+      if (!member) {
         throw new NotFoundError(`Board member not found`)
       }
 
-      if (authUser.id !== userId) {
+      const boardOwnerId = await repos.boardMemberRepository.getBoardOwner(boardId)
+
+      if (authUser.id !== userId && authUser.id !== boardOwnerId) {
         throw new ForbiddenError(
           'You are not authorized to remove this board member'
         )

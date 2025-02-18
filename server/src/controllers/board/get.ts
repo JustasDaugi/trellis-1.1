@@ -1,18 +1,19 @@
 import { idSchema } from '@server/entities/shared'
 import { boardRepository } from '@server/repositories/boardRepository'
-import { publicProcedure } from '@server/trpc'
+import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import NotFoundError from '@server/utils/errors/NotFound'
 import { getCache, setCache } from '@server/service/redis'
+import ForbiddenError from '@server/utils/errors/Forbidden'
 
-export default publicProcedure
+export default authenticatedProcedure
   .use(
     provideRepos({
       boardRepository,
     })
   )
   .input(idSchema)
-  .query(async ({ input: boardId, ctx: { repos } }) => {
+  .query(async ({ input: boardId, ctx: { repos, authUser } }) => {
     const cacheKey = `board:${boardId}`
 
     let cachedBoard
@@ -30,6 +31,9 @@ export default publicProcedure
     if (!board) {
       throw new NotFoundError('Board not found')
     }
+
+    if (board.userId !== authUser.id)
+      throw new ForbiddenError('Not authorized to view this board')
 
     const selectedBackground =
       await repos.boardRepository.findSelectedBackground(boardId)
