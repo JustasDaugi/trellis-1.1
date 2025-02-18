@@ -24,8 +24,8 @@ export default authenticatedProcedure
       const boardMembers =
         await repos.boardMemberRepository.getBoardMembers(boardId)
 
-      const member = boardMembers.find((member) => member.userId === userId)
-      if (!member) {
+      const boardMember = boardMembers.find((m) => m.userId === userId)
+      if (!boardMember) {
         throw new NotFoundError(`Board member not found`)
       }
 
