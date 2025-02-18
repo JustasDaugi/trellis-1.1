@@ -1,77 +1,118 @@
-# Setup
+# Trellis-1.1
 
+## Overview
+
+trellis-1.1 is a project management application that allows users to create and manage boards, lists, and cards efficiently. With collaboration features, real-time activity logging, and user authentication and authorization, this application is designed to make teamwork easier.
+
+**Disclaimer**: This project is a continuation of the previous capstone project.
+Project link: https://github.com/JustasDaugi/trellis
+
+## Table of Contents
+
+- [Features](#features)
+  - [Board features](#board-features)
+  - [List features](#list-features)
+  - [Card features](#card-features)
+  - [Collaboration](#collaboration)
+  - [Activity Logging](#activity-logging)
+  - [User Authentication & Security](#user-authentication--security)
+- [Tech Stack](#tech-stack)
+  - [Frontend](#frontend)
+  - [Backend](#backend)
+  - [Testing](#testing)
+- [Installation](#installation)
+
+## Features
+
+### Board features
+- **Creation & Customization**
+  - Create boards with customizable backgrounds.
+  - Update board names.
+- **Sharing & Deletion**
+  - Share boards via Gmail.
+  - View shared boards on the homepage.
+
+### List features
+  - Create new lists.
+  - Add or remove lists if you are the creator on a shared board
+
+### Card features
+- **Creation & Editing**
+  - Create cards.
+  - Add or remove cards if you are the creator on a shared board.
+- **Due Dates & Descriptions**
+  - Add or remove due dates.
+  - Add or remove card descriptions.
+  - Integration with Google Calendar to add events.
+
+### Collaboration
+- **Ownership & Membership**
+  - Board owners can share and collaborate on boards with other users.
+  - Board owners have the ability to remove board members.
+  - Collaborators can leave boards.
+
+### Activity Logging
+- **Real-time Tracking**
+  - Log all list and card creations or updates.
+  - View detailed activity logs via the "View activity" option in the Board dropdown.
+  - Logs include action types and associated entities (e.g., <user> <action> on list or card).
+- **Notifications**
+  - For instant notifications, activity updates are pushed to a Slack channel.
+
+### User Authentication & Security
+- **Password Management**
+  - Password reset functionality using JWT tokens with a 15-minute expiry.
+  - Enforced password strength requirements.
+
+## Tech Stack
+
+### Frontend
+- **Vue.js**
+- **Flowbite**
+
+### Backend
+- **Express/tRPC**: Express with RPC-based communication.
+- **Zod**: Used for runtime and compile-time schema validation.
+- **Kysely**: Manages database initialization and migrations.
+- **PostgreSQL**: Main relational database for storing relational application data.
+- **MongoDB**: Stored logs for user activity as documents.
+- **Redis**: Cached query results to reduce frequency of database queries from PostgreSQL (e.g., finding all user owned boards).
+- **Socket.io**: Delivers real-time notifications over a WebSocket connection - updating the client-side for new activity notifications.
+
+### Testing
+- **Vitest**
+- **Playwright**
+
+### Installation
 1. `npm install`
-2. Create a PostgreSQL database, or use an existing one from the previous exercises.
-3. Setup `.env` file based on `.env.example` files.
-
-## Slack Bot Setup
-
-### Creating a Slack Bot Token
-1. Go to the [Slack API website](https://api.slack.com/).
-2. Click on **"Create an App"**.
-3. Choose **"From scratch"**, then provide a name for your app and select a Slack workspace where you want to use it.
-4. Navigate to the **OAuth & Permissions** page from the left sidebar.
-5. Scroll down to **Scopes**, under **Bot Token Scopes**, and add the required permissions your bot will need (e.g., `chat:write`, `channels:read`, `groups:read`, etc.).
-6. After setting the scopes, click **Install App to Workspace** at the top of the page and follow the prompts.
-7. Once installed, you will see the **Bot User OAuth Token**. Copy this token and save it in your `.env` file as `SLACK_BOT_TOKEN`.
-
-### Retrieving the Slack Channel ID
-1. In your Slack workspace, go to the channel where you want the bot to operate.
-2. Click on the channel name at the top to open the channel details.
-3. Scroll to the bottom and click **"More"** > **"Copy Channel ID"**.
-4. Paste this channel ID into your `.env` file as `SLACK_CHANNEL_ID`.
-
-## Google Apps Password Setup
-
-### Creating Google App Passwords
-1. Go to your [Google Account Security settings](https://myaccount.google.com/security).
-2. Under the **"Signing in to Google"** section, ensure that 2-Step Verification is enabled.
-3. Once 2-Step Verification is enabled, you will see the option for **"App Passwords"**. Click on it.
-4. Sign in with your Google account again if prompted.
-5. Under **Select the app and device you want to generate the app password for**, choose **"Other (Custom name)"** and enter a name (e.g., "MyAppServer").
-6. Click **Generate** to create an app password. Copy the generated password.
-7. Add this password to your `.env` file as `GOOGLE_APP_PASSWORD`.
-8. Use the app password with your gmail account for sharing boards. Create an additional app password for sending password reset links
-
-## Running the project in development
-
-```bash
-# automatically restarts the server
-npm run dev
-
-
-## Running the project in development
-
-```bash
-# automatically restarts the server
-npm run dev
-```
+2. Create a PostgreSQL database (or use an existing one).
+3. Setup `.env` file in `server` based on `.env.example` file.
+4. Run migrations with `npm run migrate:latest`.
 
 ## Tests
 
 ```bash
-# back end tests
-npm test
+
+# back end tests with an in-memory database
+npm test -w server
 ```
 
-## Migrations
+## Running the project in development
 
 ```bash
-# prepare a migration
-npm run migrate:new myMigrationName
+# automatically restarts the server
+npm run dev -w server
 
-# migrate up to the latest migration
-npm run migrate:latest
 ```
 
-## Running the server in production
+## Running the project in production
 
 Server:
 
 ```bash
-npm run build
-npm run start
-
-# or migrate + start
-npm run prod
+npm run build -w server
+npm run start -w server
 ```
+
+## Project retrospective
+Link: https://docs.google.com/document/d/1MeZlNdtFmxfleUAkCUxbyh-ZJJHZTWSN/edit?usp=sharing&ouid=102069400217498636336&rtpof=true&sd=true
