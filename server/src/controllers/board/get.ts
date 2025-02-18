@@ -1,5 +1,6 @@
 import { idSchema } from '@server/entities/shared'
 import { boardRepository } from '@server/repositories/boardRepository'
+import { boardMemberRepository } from '@server/repositories/boardMemberRepository' // Import the board members repo
 import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import NotFoundError from '@server/utils/errors/NotFound'
@@ -10,6 +11,7 @@ export default authenticatedProcedure
   .use(
     provideRepos({
       boardRepository,
+      boardMemberRepository, // Provide the board member repo
     })
   )
   .input(idSchema)
@@ -23,7 +25,6 @@ export default authenticatedProcedure
         return cachedBoard
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error(`Error retrieving cache for key ${cacheKey}: ${error}`)
     }
 
@@ -32,8 +33,14 @@ export default authenticatedProcedure
       throw new NotFoundError('Board not found')
     }
 
-    if (board.userId !== authUser.id)
+    const boardMembers = await repos.boardMemberRepository.getBoardMembers(boardId)
+
+    const isBoardOwner = board.userId === authUser.id
+    const isBoardMember = boardMembers.some(member => member.userId === authUser.id)
+
+    if (!isBoardOwner && !isBoardMember) {
       throw new ForbiddenError('Not authorized to view this board')
+    }
 
     const selectedBackground =
       await repos.boardRepository.findSelectedBackground(boardId)
@@ -45,7 +52,6 @@ export default authenticatedProcedure
     try {
       await setCache(cacheKey, boardData, 60)
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error(`Error setting cache for key ${cacheKey}: ${error}`)
     }
 
