@@ -10,7 +10,7 @@ const redis = new Redis({
 export const getCache = async <T>(
   key: string,
   extendTTL?: number
-): Promise<T | null> => {
+): Promise<T | undefined> => {
   try {
     const data = await redis.get(key)
     if (data) {
