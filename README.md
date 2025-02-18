@@ -10,9 +10,9 @@ Project link: https://github.com/JustasDaugi/trellis
 ## Table of Contents
 
 - [Features](#features)
-  - [Board Management](#board-management)
-  - [List Management](#list-management)
-  - [Card Management](#card-management)
+  - [Board features](#board-features)
+  - [List features](#list-features)
+  - [Card features](#card-features)
   - [Collaboration](#collaboration)
   - [Activity Logging](#activity-logging)
   - [User Authentication & Security](#user-authentication--security)
@@ -81,8 +81,9 @@ Project link: https://github.com/JustasDaugi/trellis
 
 ### Testing
 - **Vitest**
+- **Playwright**
 
-
+### Installation
 1. `npm install`
 2. Create a PostgreSQL database (or use an existing one).
 3. Setup `.env` file in `server` based on `.env.example` file.
