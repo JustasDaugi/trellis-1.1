@@ -37,6 +37,7 @@ const removeMember = async () => {
 
 <template>
   <button
+    v-if="!isOwner"
     @click="removeMember"
     :disabled="isLoading"
     class="mr-2 rounded-md bg-red-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-600 disabled:bg-gray-400"
