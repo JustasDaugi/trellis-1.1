@@ -11,7 +11,7 @@ export default authenticatedProcedure
   .use(
     provideRepos({
       boardRepository,
-      boardMemberRepository, // Provide the board member repo
+      boardMemberRepository,
     })
   )
   .input(idSchema)
