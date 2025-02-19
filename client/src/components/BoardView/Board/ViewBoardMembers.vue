@@ -76,6 +76,7 @@ onMounted(fetchBoardMembers)
                 :userId="member.userId"
                 :isOwner="member.userId === boardOwnerId"
                 :loggedInUserId="authUserId ?? 0"
+                :boardOwnerId="boardOwnerId"
                 @member-removed="refreshMembers"
                 class="ml-2"
               />

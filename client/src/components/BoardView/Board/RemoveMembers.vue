@@ -7,6 +7,7 @@ const props = defineProps<{
   userId: number
   isOwner: boolean
   loggedInUserId: number
+  boardOwnerId: number | null
 }>()
 
 const emit = defineEmits<{
@@ -16,7 +17,10 @@ const emit = defineEmits<{
 const isLoading = ref(false)
 
 const buttonLabel = computed(() => {
-  return props.isOwner ? 'Remove' : 'Leave'
+  if (props.boardOwnerId === props.loggedInUserId) {
+    return 'Remove'
+  }
+  return 'Leave'
 })
 
 const removeMember = async () => {
