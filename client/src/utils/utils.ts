@@ -3,7 +3,7 @@ import { trpc } from '@/trpc'
 import { authUserId } from '@/stores/user'
 import type { ListPublic, CardPublic, BoardPublic } from '@server/shared/types'
 
-type ListCards = ListPublic & {
+export type ListCards = ListPublic & {
   cards: CardPublic[]
 }
 

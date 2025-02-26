@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable'
-import { ref, onBeforeMount, nextTick } from 'vue'
+import { ref, onBeforeMount, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useStorage } from '@vueuse/core'
 import { trpc } from '@/trpc'
 import { authUserId } from '@/stores/user'
 import AddListButton from '../components/BoardView/AddListButton.vue'
@@ -11,6 +12,7 @@ import AddCard from '../components/AddCard.vue'
 import CardActions from '../components/BoardView/Card/CardActions.vue'
 import { useBackgroundImage } from '@/utils/fetchImage'
 import { fetchLists } from '@/utils/fetchLists'
+import type { ListCards } from '@/utils/utils'
 import type { CardPublic } from '@server/shared/types'
 import {
   board,
@@ -38,6 +40,8 @@ const userId = ref<number | null>(authUserId.value)
 const userFirstName = ref<string | null>(null)
 
 const cardDueDates = ref<Record<number, string | null>>({})
+
+const storedLists = useStorage<ListCards[]>(`board-${boardId}-lists`, [])
 
 function augmentListsData(listsData: any[]): any[] {
   return listsData.map((list) => ({
@@ -72,7 +76,11 @@ onBeforeMount(async () => {
       const fetchedListsData = await fetchLists(boardId)
       const augmentedLists = augmentListsData(fetchedListsData)
 
-      lists.value.splice(0, lists.value.length, ...augmentedLists)
+      if (storedLists.value.length > 0) {
+        lists.value.splice(0, lists.value.length, ...storedLists.value)
+      } else {
+        lists.value.splice(0, lists.value.length, ...augmentedLists)
+      }
     } else {
       console.error('User ID is not available.')
     }
@@ -80,6 +88,14 @@ onBeforeMount(async () => {
     console.error('Error initializing BoardView:', error)
   }
 })
+
+watch(
+  lists,
+  (newLists) => {
+    storedLists.value = newLists
+  },
+  { deep: true }
+)
 
 const selectedCard = ref<CardPublic | null>(null)
 const showDialog = ref(false)
