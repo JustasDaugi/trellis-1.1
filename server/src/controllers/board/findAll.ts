@@ -47,19 +47,18 @@ export default authenticatedProcedure
         offset
       )
 
-      const allowedBoards = []
-      for (const board of allBoards) {
-        const isOwner = board.userId === authUser.id
-        const isMember = await repos.boardMemberRepository.isMemberOfBoard(
-          board.id,
-          authUser.id
-        )
+      const boardsCheckResults = await Promise.all(
+        allBoards.map(async (board) => {
+          const isOwner = board.userId === authUser.id
+          const isMember = await repos.boardMemberRepository.isMemberOfBoard(
+            board.id,
+            authUser.id
+          )
+          return isOwner || isMember ? board : null
+        })
+      )
 
-        if (isOwner || isMember) {
-          allowedBoards.push(board)
-        }
-      }
-
+      const allowedBoards = boardsCheckResults.filter((b) => b !== null)
       try {
         const CACHE_TTL = 5 * 60
         await setCache(cacheKey, allowedBoards, CACHE_TTL)
