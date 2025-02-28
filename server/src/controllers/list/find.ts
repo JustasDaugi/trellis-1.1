@@ -1,14 +1,18 @@
 import { listSchema, type ListPublic } from '@server/entities/list'
 import provideRepos from '@server/trpc/provideRepos'
 import { listRepository } from '@server/repositories/listRepository'
-import { publicProcedure } from '@server/trpc'
-import { getCache, setCache } from '@server/service/redis'
-import logger from '@server/utils/logger/logger'
+import { boardRepository } from '@server/repositories/boardRepository'
+import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
+import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
+import NotFoundError from '@server/utils/errors/NotFound'
+import ForbiddenError from '@server/utils/errors/Forbidden'
 
-export default publicProcedure
+export default authenticatedProcedure
   .use(
     provideRepos({
       listRepository,
+      boardRepository,
+      boardMemberRepository,
     })
   )
   .input(
@@ -17,31 +21,28 @@ export default publicProcedure
     })
   )
   .mutation(
-    async ({ input: { boardId }, ctx: { repos } }): Promise<ListPublic[]> => {
-      const cacheKey = `lists:board:${boardId}`
+    async ({
+      input: { boardId },
+      ctx: { repos, authUser },
+    }): Promise<ListPublic[]> => {
+      const board = await repos.boardRepository.findById(boardId)
+      if (!board) {
+        throw new NotFoundError(`Board with id ${boardId} not found.`)
+      }
 
-      try {
-        const EXTEND_TTL_THRESHOLD = 4 * 60
-        const cachedLists = await getCache<ListPublic[]>(
-          cacheKey,
-          EXTEND_TTL_THRESHOLD
+      const userIsOwner = board.userId === authUser.id
+      const userIsMember = await repos.boardMemberRepository.isMemberOfBoard(
+        board.id,
+        authUser.id
+      )
+
+      if (!userIsOwner && !userIsMember) {
+        throw new ForbiddenError(
+          'You are not authorized to view lists for this board.'
         )
-        if (cachedLists && Array.isArray(cachedLists)) {
-          return cachedLists
-        }
-      } catch (error) {
-        logger.error('Error retrieving cache for key:', cacheKey, error)
       }
 
       const lists = await repos.listRepository.findByBoardId(boardId)
-
-      try {
-        const CACHE_TTL = 5 * 60
-        await setCache(cacheKey, lists, CACHE_TTL)
-      } catch (error) {
-        logger.error('Error setting cache for key:', cacheKey, error)
-      }
-
       return lists
     }
   )
