@@ -1,10 +1,10 @@
 import { userSchema, type UserPublic } from '@server/entities/user'
 import provideRepos from '@server/trpc/provideRepos'
 import { userRepository } from '@server/repositories/userRepository'
-import { publicProcedure } from '@server/trpc'
 import NotFoundError from '@server/utils/errors/NotFound'
+import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 
-export default publicProcedure
+export default authenticatedProcedure
   .use(
     provideRepos({
       userRepository,
