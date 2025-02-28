@@ -79,6 +79,7 @@ export interface User {
   id: Generated<number>
   lastName: string
   password: string
+  resetId: string | null
 }
 
 export interface DB {
