@@ -76,6 +76,17 @@ export function boardMemberRepository(db: Database) {
 
       return result?.boardOwner ?? null
     },
+
+    async isMemberOfBoard(boardId: number, userId: number): Promise<boolean> {
+      const member = await db
+        .selectFrom('boardMembers')
+        .select('boardMembers.boardId')
+        .where('boardId', '=', boardId)
+        .where('userId', '=', userId)
+        .executeTakeFirst()
+
+      return !!member
+    },
   }
 }
 
