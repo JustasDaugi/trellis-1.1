@@ -1,13 +1,14 @@
 import { boardRepository } from '@server/repositories/boardRepository'
 import { userRepository } from '@server/repositories/userRepository'
 import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
-import { publicProcedure } from '@server/trpc'
+import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import { boardSchema } from '@server/entities/board'
 import { userSchema } from '@server/entities/user'
 import { z } from 'zod'
 import NotFoundError from '@server/utils/errors/NotFound'
 import InternalServerError from '@server/utils/errors/InternalServerError'
+import ForbiddenError from '@server/utils/errors/Forbidden'
 import sendEmail from '@server/service/email'
 
 const shareBoardInput = z.object({
@@ -15,7 +16,7 @@ const shareBoardInput = z.object({
   email: userSchema.pick({ email: true }).shape.email,
 })
 
-export default publicProcedure
+export default authenticatedProcedure
   .use(
     provideRepos({
       boardRepository,
@@ -24,12 +25,15 @@ export default publicProcedure
     })
   )
   .input(shareBoardInput)
-  .mutation(async ({ input, ctx: { repos } }) => {
+  .mutation(async ({ input, ctx: { repos, authUser } }) => {
     const { boardId, email } = input
-
     const board = await repos.boardRepository.findById(boardId)
     if (!board) {
       throw new NotFoundError('Board not found')
+    }
+
+    if (board.userId !== authUser.id) {
+      throw new ForbiddenError('Only the board owner can share this board.')
     }
 
     const user = await repos.userRepository.findByEmail(email)
