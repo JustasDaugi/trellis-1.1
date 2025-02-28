@@ -1,6 +1,6 @@
 import { idSchema } from '@server/entities/shared'
 import { boardRepository } from '@server/repositories/boardRepository'
-import { boardMemberRepository } from '@server/repositories/boardMemberRepository' // Import the board members repo
+import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
 import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import NotFoundError from '@server/utils/errors/NotFound'
