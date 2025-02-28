@@ -3,9 +3,11 @@ import { boardRepository } from '@server/repositories/boardRepository'
 import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
 import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
-import NotFoundError from '@server/utils/errors/NotFound'
 import { getCache, setCache } from '@server/service/redis'
+import NotFoundError from '@server/utils/errors/NotFound'
 import ForbiddenError from '@server/utils/errors/Forbidden'
+import logger from '@server/utils/logger/logger'
+
 
 export default authenticatedProcedure
   .use(
@@ -25,7 +27,7 @@ export default authenticatedProcedure
         return cachedBoard
       }
     } catch (error) {
-      console.error(`Error retrieving cache for key ${cacheKey}: ${error}`)
+      logger.error(`Error retrieving cache for key ${cacheKey}: ${error}`)
     }
 
     const board = await repos.boardRepository.findById(boardId)
@@ -52,7 +54,7 @@ export default authenticatedProcedure
     try {
       await setCache(cacheKey, boardData, 60)
     } catch (error) {
-      console.error(`Error setting cache for key ${cacheKey}: ${error}`)
+      logger.error(`Error setting cache for key ${cacheKey}: ${error}`)
     }
 
     return boardData
