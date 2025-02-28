@@ -8,13 +8,16 @@ import { publicProcedure } from '@server/trpc'
 import { getCache, setCache } from '@server/service/redis'
 import logger from '@server/utils/logger/logger'
 
-const cardPublicSchema = cardSchema.pick({
-  id: true,
-  listId: true,
-  order: true,
-  title: true,
-  dueDate: true,
-})
+const cardPublicSchema = cardSchema
+  .pick({
+    id: true,
+    order: true,
+    title: true,
+    dueDate: true,
+  })
+  .extend({
+    listId: cardSchema.shape.listId.optional(),
+  })
 
 const listPublicSchema = listSchema
   .pick({
@@ -39,7 +42,7 @@ export default publicProcedure
     })
   )
   .input(listSchema.pick({ boardId: true }))
-  .mutation(async ({ input: { boardId }, ctx: { repos } }) => {
+  .query(async ({ input: { boardId }, ctx: { repos } }) => {
     const cacheKey = `board:fetchData:${boardId}`
 
     try {
