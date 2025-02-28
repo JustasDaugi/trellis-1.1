@@ -20,7 +20,6 @@ const [createList, errorMessage] = useErrorMessage(async () => {
       const list = await trpc.list.create.mutate({
         title: listForm.value.title,
         boardId,
-        userId,
       })
       console.log('List created successfully')
       emit('list-created', list)
