@@ -4,13 +4,14 @@ import { createCallerFactory } from '@server/trpc'
 import { wrapInRollbacks } from '@tests/utils/transactions'
 import { insertAll } from '@tests/utils/records'
 import boardRouter from '..'
+import { authContext } from '@tests/utils/context'
 
 const createCaller = createCallerFactory(boardRouter)
 const db = await wrapInRollbacks(createTestDatabase())
 
 const [user] = await insertAll(db, 'user', fakeUser())
 
-const { findAll } = createCaller({ db })
+const { findAll } = createCaller(authContext({ db }, user))
 
 it('should return an empty list if there are no boards', async () => {
   // ARRANGE & ACT
