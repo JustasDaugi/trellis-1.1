@@ -44,6 +44,19 @@ export function userRepository(db: Database) {
 
       return result.numUpdatedRows > 0
     },
+
+    async storeResetId(
+      email: string,
+      resetId: string | null
+    ): Promise<boolean> {
+      const result = await db
+        .updateTable('user')
+        .set({ resetId })
+        .where('email', '=', email)
+        .executeTakeFirst()
+
+      return result.numUpdatedRows > 0
+    },
   }
 }
 
