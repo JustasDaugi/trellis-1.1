@@ -1,37 +1,77 @@
 import { authRepoContext } from '@tests/utils/context'
 import { createCallerFactory } from '@server/trpc'
-import type { ListRepository } from '@server/repositories/listRepository'
 import { fakeList } from '@server/entities/tests/fakes'
 import listRouter from '..'
 
-const repos = {
+const userId = 123
+
+const commonRepos = {
   listRepository: {
-    findByBoardId: async (boardId: number) => [
+    findByBoardId: async (bId: number) => [
       fakeList({
         id: 1,
-        boardId,
+        boardId: bId,
         title: 'Test List',
       }),
     ],
-  } satisfies Partial<ListRepository>,
+  },
+  boardRepository: {
+    findById: async (id: number) => {
+      return {
+        id,
+        userId,
+      }
+    },
+  },
+  boardMemberRepository: {
+    isMemberOfBoard: async () => true,
+  },
 }
 
 const createCaller = createCallerFactory(listRouter)
-const { find } = createCaller(authRepoContext(repos))
+
+const happyCaller = createCaller(authRepoContext(commonRepos, { id: userId }))
+const { find: findHappy } = happyCaller
 
 it('should return a list of lists for a given board', async () => {
-  // ARRANGE (Given)
-  const boardId = 5
+  // ARRANGE
+  const testBoardId = 5
 
-  // ACT (When)
-  const listsFound = await find({ boardId })
+  // ACT
+  const listsFound = await findHappy({ boardId: testBoardId })
 
-  // ASSERT (Then)
+  // ASSERT
   expect(listsFound).toMatchObject([
     {
       id: 1,
-      boardId,
+      boardId: testBoardId,
       title: 'Test List',
     },
   ])
+})
+
+it('should throw ForbiddenError if user is neither owner nor member', async () => {
+  const notOwnerOrMemberRepos = {
+    ...commonRepos,
+    boardRepository: {
+      findById: async (id: number) => ({
+        id,
+        userId: 9999,
+      }),
+    },
+    boardMemberRepository: {
+      isMemberOfBoard: async () => false,
+    },
+  }
+
+  const forbiddenCaller = createCaller(
+    authRepoContext(notOwnerOrMemberRepos, { id: 111 })
+  )
+  const { find: findForbidden } = forbiddenCaller
+
+  const testBoardId = 5
+
+  await expect(findForbidden({ boardId: testBoardId })).rejects.toThrow(
+    /You are not authorized to view lists for this board/i
+  )
 })
