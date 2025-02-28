@@ -1,14 +1,20 @@
 import { cardSchema, type CardPublic } from '@server/entities/card'
 import provideRepos from '@server/trpc/provideRepos'
 import { cardRepository } from '@server/repositories/cardRepository'
-import { publicProcedure } from '@server/trpc'
-import { getCache, setCache } from '@server/service/redis'
-import logger from '@server/utils/logger/logger'
+import { listRepository } from '@server/repositories/listRepository'
+import { boardRepository } from '@server/repositories/boardRepository'
+import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
+import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
+import NotFoundError from '@server/utils/errors/NotFound'
+import ForbiddenError from '@server/utils/errors/Forbidden'
 
-export default publicProcedure
+export default authenticatedProcedure
   .use(
     provideRepos({
       cardRepository,
+      listRepository,
+      boardRepository,
+      boardMemberRepository,
     })
   )
   .input(
@@ -20,31 +26,33 @@ export default publicProcedure
       .partial({ description: true })
   )
   .mutation(
-    async ({ input: { listId }, ctx: { repos } }): Promise<CardPublic[]> => {
-      const cacheKey = `cards:list:${listId}`
+    async ({
+      input: { listId },
+      ctx: { repos, authUser },
+    }): Promise<CardPublic[]> => {
+      const list = await repos.listRepository.findById(listId)
+      if (!list) {
+        throw new NotFoundError(`List with id ${listId} not found.`)
+      }
 
-      try {
-        const EXTEND_TTL_THRESHOLD = 4 * 60
-        const cachedCards = await getCache<CardPublic[]>(
-          cacheKey,
-          EXTEND_TTL_THRESHOLD
+      const board = await repos.boardRepository.findById(list.boardId)
+      if (!board) {
+        throw new NotFoundError(`Board with id ${list.boardId} not found.`)
+      }
+
+      const userIsOwner = board.userId === authUser.id
+      const userIsMember = await repos.boardMemberRepository.isMemberOfBoard(
+        board.id,
+        authUser.id
+      )
+
+      if (!userIsOwner && !userIsMember) {
+        throw new ForbiddenError(
+          'You do not have permission to view cards on this list.'
         )
-        if (cachedCards && Array.isArray(cachedCards)) {
-          return cachedCards
-        }
-      } catch (error) {
-        logger.error('Error retrieving cache for key:', cacheKey, error)
       }
 
       const cards = await repos.cardRepository.findByListId(listId)
-
-      try {
-        const CACHE_TTL = 5 * 60
-        await setCache(cacheKey, cards, CACHE_TTL)
-      } catch (error) {
-        logger.error('Error setting cache for key:', cacheKey, error)
-      }
-
       return cards
     }
   )
