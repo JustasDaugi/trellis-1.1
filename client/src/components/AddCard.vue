@@ -26,7 +26,6 @@ const [createCard, errorMessage] = useErrorMessage(async () => {
         title: title.trim(),
         listId,
         description: description.trim(),
-        userId,
       })
       console.log('Card created successfully')
       emit('card-created', card)
@@ -37,7 +36,10 @@ const [createCard, errorMessage] = useErrorMessage(async () => {
       console.error('List ID, card title, or user ID is missing')
       throw new Error('List ID, card title, or user ID is missing')
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.data?.code === 'FORBIDDEN') {
+      throw new Error('You are not authorized to create a card here.')
+    }
     console.log('Card creation failed:', error)
     throw error
   }
