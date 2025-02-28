@@ -27,24 +27,21 @@ const closeDialog = () => {
 }
 
 const [shareBoard, shareErrorMessage] = useErrorMessage(async () => {
-  try {
-    if (emailAddress.value.trim()) {
-      const boardId = Number(route.params.id)
-      if (isNaN(boardId)) {
-        throw new Error('Invalid board ID')
-      }
-
-      const response = await trpc.board.share.mutate({
-        boardId: boardId,
-        email: emailAddress.value.trim(),
-      })
-      console.log('Board shared successfully:', response)
-      successMessage.value = 'Message sent successfully'
-    }
-  } catch (error) {
-    console.log('Board share failed:', error)
-    throw error
+  if (!emailAddress.value.trim()) {
+    throw new Error('Email address is required')
   }
+
+  const boardId = Number(route.params.id)
+  if (isNaN(boardId)) {
+    throw new Error('Invalid board ID')
+  }
+
+  await trpc.board.share.mutate({
+    boardId,
+    email: emailAddress.value.trim(),
+  })
+
+  successMessage.value = 'Message sent successfully'
 })
 
 const share = async () => {
