@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { defineProps, defineEmits } from 'vue'
 import { trpc } from '@/trpc'
+import { authUserId } from '@/stores/user'
 import useErrorMessage from '@/composables/useErrorMessage'
 import Buttons from './Buttons.vue'
 import DueDate from './DueDate.vue'
@@ -24,6 +25,9 @@ const selectedDueDate = ref<Date | null>(props.card.dueDate)
 const cardTitle = ref(props.card.title)
 const cardDescription = ref(props.card.description || '')
 
+const currentUserId = authUserId.value
+const isOwner = computed(() => props.card.userId === currentUserId)
+
 const startDateButtonText = computed(() => {
   if (!selectedDueDate.value) {
     return 'Due date'
@@ -36,6 +40,10 @@ function closeDialog() {
 }
 
 const [updateCard, updateErrorMessage] = useErrorMessage(async () => {
+  if (!isOwner.value) {
+    throw new Error('You are not authorized to update this card.')
+  }
+
   if (cardTitle.value.trim()) {
     const previousTitle = props.card.title
     const previousDescription = props.card.description || ''
@@ -75,6 +83,10 @@ async function confirmUpdate() {
 }
 
 const [deleteCard, deleteErrorMessage] = useErrorMessage(async () => {
+  if (!isOwner.value) {
+    throw new Error('You are not authorized to delete this card.')
+  }
+
   await trpc.card.deleteById.mutate({ id: props.card.id })
   emit('delete-card')
   closeDialog()
@@ -89,6 +101,10 @@ function toggleDeleteMessage() {
 }
 
 const [removeDueDate, removeDueDateError] = useErrorMessage(async () => {
+  if (!isOwner.value) {
+    throw new Error('You are not authorized to remove the due date of this card.')
+  }
+
   await trpc.card.deleteDueDate.mutate({ id: props.card.id })
   selectedDueDate.value = null
   emit('update-card', {
@@ -121,6 +137,7 @@ async function confirmAddToCalendar() {
     console.error('Error adding to calendar:', error)
   }
 }
+
 function handleStartDateDone(newStartDate: Date | null) {
   selectedDueDate.value = newStartDate
   emit('update-card', {
