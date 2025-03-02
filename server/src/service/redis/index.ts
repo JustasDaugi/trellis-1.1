@@ -16,8 +16,7 @@ const sanitizeKeyForLog = (key: string): string =>
     )
     .join(':')
 
-// List of keys that contain sensitive or unnecessary data
-const sensitiveKeys = new Set(['ctx', 'req', 'socket', 'parser', 'server'])
+const sensitiveKeys = new Set(['req', 'socket', 'parser', 'server'])
 
 const safeSerialize = (value: any): any => {
   const seen = new WeakSet()
@@ -102,5 +101,19 @@ export const setCache = async (
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     logger.error(`Error setting cache for key ${sanitizedKey}: ${errorMessage}`)
+  }
+}
+
+export const invalidateCache = async (key: string): Promise<void> => {
+  const sanitizedKey = sanitizeKeyForLog(key)
+  try {
+    logger.info(`Invalidating cache for key: ${sanitizedKey}`)
+    await redis.del(key)
+    logger.info(`Cache invalidated for key: ${sanitizedKey}`)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error(
+      `Error invalidating cache for key ${sanitizedKey}: ${errorMessage}`
+    )
   }
 }
