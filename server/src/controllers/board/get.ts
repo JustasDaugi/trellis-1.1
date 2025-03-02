@@ -3,11 +3,9 @@ import { boardRepository } from '@server/repositories/boardRepository'
 import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
 import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
-import { getCache, setCache } from '@server/service/redis'
 import NotFoundError from '@server/utils/errors/NotFound'
 import ForbiddenError from '@server/utils/errors/Forbidden'
-import logger from '@server/utils/logger/logger'
-
+import { cacheMiddleware } from '@server/middleware'
 
 export default authenticatedProcedure
   .use(
@@ -17,29 +15,24 @@ export default authenticatedProcedure
     })
   )
   .input(idSchema)
+  .use(
+    cacheMiddleware({
+      key: ({ input }) => `board:${input}`,
+      ttl: 60,
+    })
+  )
   .query(async ({ input: boardId, ctx: { repos, authUser } }) => {
-    const cacheKey = `board:${boardId}`
-
-    let cachedBoard
-    try {
-      cachedBoard = await getCache<any>(cacheKey)
-      if (cachedBoard) {
-        return cachedBoard
-      }
-    } catch (error) {
-      logger.error(`Error retrieving cache for key ${cacheKey}: ${error}`)
-    }
-
     const board = await repos.boardRepository.findById(boardId)
     if (!board) {
       throw new NotFoundError('Board not found')
     }
 
-    const boardMembers = await repos.boardMemberRepository.getBoardMembers(boardId)
-
+    const boardMembers =
+      await repos.boardMemberRepository.getBoardMembers(boardId)
     const isBoardOwner = board.userId === authUser.id
-    const isBoardMember = boardMembers.some(member => member.userId === authUser.id)
-
+    const isBoardMember = boardMembers.some(
+      (member) => member.userId === authUser.id
+    )
     if (!isBoardOwner && !isBoardMember) {
       throw new ForbiddenError('Not authorized to view this board')
     }
@@ -49,12 +42,6 @@ export default authenticatedProcedure
     const boardData = {
       ...board,
       selectedBackground: selectedBackground?.selectedBackground ?? null,
-    }
-
-    try {
-      await setCache(cacheKey, boardData, 60)
-    } catch (error) {
-      logger.error(`Error setting cache for key ${cacheKey}: ${error}`)
     }
 
     return boardData
