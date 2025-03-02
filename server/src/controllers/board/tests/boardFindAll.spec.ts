@@ -6,6 +6,13 @@ import { insertAll } from '@tests/utils/records'
 import boardRouter from '..'
 import { authContext } from '@tests/utils/context'
 
+vi.mock('@server/middleware', () => ({
+  cacheMiddleware:
+    () =>
+    ({ next }: { next: () => any }) =>
+      next(),
+}))
+
 const createCaller = createCallerFactory(boardRouter)
 const db = await wrapInRollbacks(createTestDatabase())
 
