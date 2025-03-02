@@ -27,9 +27,9 @@ export default authenticatedProcedure
   )
   .use(
     cacheMiddleware({
-      key: ({ input }) => {
+      key: ({ input, ctx }) => {
         const typedInput = input as BoardFindAllInput
-        return `limit:${typedInput.limit}:offset:${typedInput.offset}`
+        return `boards-allowed:${ctx.authUser.id}:user:${typedInput.userId}:limit:${typedInput.limit}:offset:${typedInput.offset}`
       },
       ttl: 5 * 60,
     })
