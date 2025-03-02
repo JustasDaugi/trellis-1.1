@@ -21,6 +21,10 @@ export default authenticatedProcedure
       ttl: 60,
     })
   )
+  // TODO:
+  // add middleware to:
+  // Ask the user if they are authenticated
+  // If they are, they can hit the cache layer
   .query(async ({ input: boardId, ctx: { repos, authUser } }) => {
     const board = await repos.boardRepository.findById(boardId)
     if (!board) {
