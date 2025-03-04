@@ -25,6 +25,12 @@ export default authenticatedProcedure
       offset: z.number().int().nonnegative().default(0),
     })
   )
+  .use(async ({ ctx, next }) => {
+    if (!ctx.authUser) {
+      throw new Error('User must be authenticated to hit the cache layer')
+    }
+    return next()
+  })
   .use(
     cacheMiddleware({
       key: ({ input, ctx }) => {
