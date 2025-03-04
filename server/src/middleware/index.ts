@@ -5,6 +5,7 @@ type CacheMiddlewareOptions = {
   key: ({ input, ctx }: { input: unknown; ctx: any }) => string
   ttl: number
   invalidate?: boolean
+  bypass?: boolean
 }
 
 const tryCall = async <T>(
@@ -32,7 +33,7 @@ export const cacheMiddleware = (options: CacheMiddlewareOptions) => {
     const cacheKey = options.key({ input, ctx })
     logger.info(`Cache middleware triggered for key: ${cacheKey}`)
 
-    if (!options.invalidate) {
+    if (!options.invalidate && !options.bypass) {
       const cachedData = await tryCall(
         () => getCache<any>(cacheKey),
         `Error retrieving cache for key ${cacheKey}`
