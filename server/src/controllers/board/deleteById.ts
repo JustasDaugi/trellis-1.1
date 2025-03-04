@@ -18,7 +18,10 @@ export default authenticatedProcedure
     })
   )
   .mutation(
-    async ({ input: { id }, ctx: { repos, authUser } }): Promise<BoardPublic> => {
+    async ({
+      input: { id },
+      ctx: { repos, authUser },
+    }): Promise<BoardPublic> => {
       const board = await repos.boardRepository.findById(id)
 
       if (!board) {
