@@ -15,16 +15,18 @@ export default authenticatedProcedure
     })
   )
   .input(idSchema)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.authUser) {
+      throw new Error('User must be authenticated to hit the cache layer')
+    }
+    return next()
+  })
   .use(
     cacheMiddleware({
-      key: ({ input }) => `board:${input}`,
+      key: ({ input, ctx }) => `board:${ctx.authUser.id}:${input}`,
       ttl: 60,
     })
   )
-  // TODO:
-  // add middleware to:
-  // Ask the user if they are authenticated
-  // If they are, they can hit the cache layer
   .query(async ({ input: boardId, ctx: { repos, authUser } }) => {
     const board = await repos.boardRepository.findById(boardId)
     if (!board) {
