@@ -62,7 +62,11 @@ function augmentListsData(listsData: any[]): any[] {
 
 onBeforeMount(async () => {
   try {
-    const boardFound = await trpc.board.get.query(boardId)
+    const boardFound = await trpc.board.get.query({
+      id: boardId,
+      title: board.value?.title,
+    })
+
     if (boardFound) {
       board.value = boardFound
     } else {
