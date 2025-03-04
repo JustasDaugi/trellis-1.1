@@ -1,4 +1,4 @@
-import { idSchema } from '@server/entities/shared'
+import { boardSchema, type BoardPublic } from '@server/entities/board'
 import { boardRepository } from '@server/repositories/boardRepository'
 import { boardMemberRepository } from '@server/repositories/boardMemberRepository'
 import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
@@ -7,6 +7,10 @@ import NotFoundError from '@server/utils/errors/NotFound'
 import ForbiddenError from '@server/utils/errors/Forbidden'
 import { cacheMiddleware } from '@server/middleware'
 
+const boardGetInput = boardSchema
+  .pick({ id: true, title: true })
+  .partial({ title: true })
+
 export default authenticatedProcedure
   .use(
     provideRepos({
@@ -14,7 +18,7 @@ export default authenticatedProcedure
       boardMemberRepository,
     })
   )
-  .input(idSchema)
+  .input(boardGetInput)
   .use(async ({ ctx, next }) => {
     if (!ctx.authUser) {
       throw new Error('User must be authenticated to hit the cache layer')
@@ -23,19 +27,21 @@ export default authenticatedProcedure
   })
   .use(
     cacheMiddleware({
-      key: ({ input, ctx }) => `board:${ctx.authUser.id}:${input}`,
+      key: ({ input, ctx }) => {
+        const { id, title } = input as { id: number; title?: string }
+        return `board:${ctx.authUser.id}:${id}:${title || ''}`
+      },
       ttl: 60,
-      bypass: true,
     })
   )
-  .query(async ({ input: boardId, ctx: { repos, authUser } }) => {
-    const board = await repos.boardRepository.findById(boardId)
+  .query(async ({ input, ctx: { repos, authUser } }) => {
+    const { id } = input
+    const board = await repos.boardRepository.findById(id)
     if (!board) {
       throw new NotFoundError('Board not found')
     }
 
-    const boardMembers =
-      await repos.boardMemberRepository.getBoardMembers(boardId)
+    const boardMembers = await repos.boardMemberRepository.getBoardMembers(id)
     const isBoardOwner = board.userId === authUser.id
     const isBoardMember = boardMembers.some(
       (member) => member.userId === authUser.id
@@ -45,8 +51,8 @@ export default authenticatedProcedure
     }
 
     const selectedBackground =
-      await repos.boardRepository.findSelectedBackground(boardId)
-    const boardData = {
+      await repos.boardRepository.findSelectedBackground(id)
+    const boardData: BoardPublic = {
       ...board,
       selectedBackground: selectedBackground?.selectedBackground ?? null,
     }
