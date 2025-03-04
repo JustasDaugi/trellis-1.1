@@ -5,7 +5,8 @@ import { authenticatedProcedure } from '@server/trpc/authenticatedProcedure'
 import provideRepos from '@server/trpc/provideRepos'
 import NotFoundError from '@server/utils/errors/NotFound'
 import ForbiddenError from '@server/utils/errors/Forbidden'
-import { cacheMiddleware } from '@server/middleware'
+import { setCache } from '@server/service/redis'
+import logger from '@server/utils/logger/logger'
 
 export default authenticatedProcedure
   .use(
@@ -21,12 +22,6 @@ export default authenticatedProcedure
     }
     return next()
   })
-  .use(
-    cacheMiddleware({
-      key: ({ input, ctx }) => `board:${ctx.authUser.id}:${input}`,
-      ttl: 60,
-    })
-  )
   .query(async ({ input: boardId, ctx: { repos, authUser } }) => {
     const board = await repos.boardRepository.findById(boardId)
     if (!board) {
@@ -48,6 +43,14 @@ export default authenticatedProcedure
     const boardData = {
       ...board,
       selectedBackground: selectedBackground?.selectedBackground ?? null,
+    }
+
+    const cacheKey = `board:${authUser.id}:${boardId}`
+    try {
+      await setCache(cacheKey, boardData, 60)
+      logger.info(`Cache updated for key ${cacheKey}`)
+    } catch (error) {
+      logger.error(`Error setting cache for key ${cacheKey}:`, error)
     }
 
     return boardData
