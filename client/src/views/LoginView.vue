@@ -1,27 +1,34 @@
 <script lang="ts" setup>
-import { login } from '@/stores/user'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import PageForm from '@/components/PageForm.vue'
 import { FwbAlert, FwbButton, FwbInput } from 'flowbite-vue'
-import { useRouter } from 'vue-router'
-import useErrorMessage from '@/composables/useErrorMessage'
-
-const router = useRouter()
+import { login } from '@/stores/user'
 
 const userForm = ref({
   email: '',
   password: '',
 })
 
-const [submitLogin, errorMessage] = useErrorMessage(async () => {
-  await login(userForm.value)
+const error = ref('')
 
-  const redirectTo = (router.currentRoute.value.query.redirect as string) ?? {
-    name: 'MainView',
+const router = useRouter()
+
+async function submitLogin() {
+  error.value = ''
+
+  try {
+    await login(userForm.value)
+
+    const redirectTo = (router.currentRoute.value.query.redirect as string) ?? {
+      name: 'MainView',
+    }
+    router.push(redirectTo)
+
+  } catch (err: any) {
+    error.value = 'Incorrect credentials. Please try again.'
   }
-
-  router.push(redirectTo)
-})
+}
 </script>
 
 <template>
@@ -45,12 +52,14 @@ const [submitLogin, errorMessage] = useErrorMessage(async () => {
         :required="true"
       />
 
-      <FwbAlert v-if="errorMessage" data-testid="errorMessage" type="danger">
-        {{ errorMessage }}
+      <FwbAlert v-if="error" data-testid="errorMessage" type="danger">
+        {{ error }}
       </FwbAlert>
 
       <div class="grid">
-        <FwbButton color="default" type="submit" size="xl"> Log in </FwbButton>
+        <FwbButton color="default" type="submit" size="xl">
+          Log in
+        </FwbButton>
       </div>
 
       <div class="mt-2 text-center">
@@ -58,6 +67,7 @@ const [submitLogin, errorMessage] = useErrorMessage(async () => {
           to="/reset-password"
           class="text-lg font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
         >
+        
           Forgot your password?
         </RouterLink>
       </div>
