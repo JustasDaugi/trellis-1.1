@@ -1,11 +1,14 @@
 <script lang="ts" setup>
-import { signup } from '@/stores/user'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import PageForm from '@/components/PageForm.vue'
 import { FwbAlert, FwbButton, FwbInput } from 'flowbite-vue'
+import { signup, login } from '@/stores/user'
 import { DEFAULT_SERVER_ERROR } from '@/consts'
 import AlertError from '@/components/AlertError.vue'
 import PasswordCheck from '@/components/PasswordCheck.vue'
+
+const router = useRouter()
 
 const userForm = ref({
   email: '',
@@ -22,9 +25,15 @@ async function submitSignup() {
   try {
     await signup(userForm.value)
     errorMessage.value = ''
+
+    await login({ email: userForm.value.email, password: userForm.value.password })
+
+    const redirectTo = (router.currentRoute.value.query.redirect as string) ?? { name: 'MainView' }
+    router.push(redirectTo)
+
     hasSucceeded.value = true
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : DEFAULT_SERVER_ERROR
+  } catch (err: any) {
+    errorMessage.value = err instanceof Error ? err.message : DEFAULT_SERVER_ERROR
   }
 }
 
@@ -80,13 +89,7 @@ const handlePasswordBlur = () => {
       <PasswordCheck v-if="showPasswordCheck" :password="userForm.password" />
 
       <FwbAlert v-if="hasSucceeded" data-testid="successMessage" type="success">
-        You have successfully signed up! You can now log in.
-        <RouterLink
-          to="/login"
-          class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-        >
-          Go to the login page
-        </RouterLink>
+        You have successfully signed up and are now logged in!
       </FwbAlert>
 
       <AlertError :message="errorMessage">
