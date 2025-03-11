@@ -21,6 +21,7 @@ const emit = defineEmits<{
 const isDialogOpen = ref(true)
 const isDeleteMessageVisible = ref(false)
 const showStartDateModal = ref(false)
+
 const selectedDueDate = ref<Date | null>(props.card.dueDate)
 const cardTitle = ref(props.card.title)
 const cardDescription = ref(props.card.description || '')
@@ -40,42 +41,43 @@ function closeDialog() {
 }
 
 const [updateCard, updateErrorMessage] = useErrorMessage(async () => {
-  if (!isOwner.value) {
-    throw new Error('You are not authorized to update this card.')
+  const newTitle = cardTitle.value.trim()
+  const newDesc = cardDescription.value.trim()
+  const previousTitle = props.card.title
+  const previousDescription = props.card.description || ''
+
+  const updates: { title?: string; description?: string } = {}
+
+  if (newTitle && newTitle !== previousTitle) {
+    updates.title = newTitle
+  }
+  if (newDesc !== previousDescription) {
+    updates.description = newDesc
   }
 
-  if (cardTitle.value.trim()) {
-    const previousTitle = props.card.title
-    const previousDescription = props.card.description || ''
-    const updates: { title?: string; description?: string } = {}
+  if (Object.keys(updates).length > 0) {
+    await trpc.card.update.mutate({
+      id: props.card.id,
+      ...updates,
+    })
 
-    if (cardTitle.value.trim() !== previousTitle) {
-      updates.title = cardTitle.value.trim()
+    if (updates.title) {
       emit('update-card', {
         updatedField: 'title',
         previousValue: previousTitle,
-        newValue: cardTitle.value.trim(),
+        newValue: updates.title,
       })
     }
-
-    if (cardDescription.value.trim() !== previousDescription) {
-      updates.description = cardDescription.value.trim()
+    if (updates.description) {
       emit('update-card', {
         updatedField: 'description',
         previousValue: previousDescription,
-        newValue: cardDescription.value.trim(),
+        newValue: updates.description,
       })
     }
-
-    if (Object.keys(updates).length > 0) {
-      await trpc.card.update.mutate({
-        id: props.card.id,
-        ...updates,
-      })
-    }
-
-    closeDialog()
   }
+
+  closeDialog()
 })
 
 async function confirmUpdate() {
@@ -83,10 +85,6 @@ async function confirmUpdate() {
 }
 
 const [deleteCard, deleteErrorMessage] = useErrorMessage(async () => {
-  if (!isOwner.value) {
-    throw new Error('You are not authorized to delete this card.')
-  }
-
   await trpc.card.deleteById.mutate({ id: props.card.id })
   emit('delete-card')
   closeDialog()
@@ -101,12 +99,9 @@ function toggleDeleteMessage() {
 }
 
 const [removeDueDate, removeDueDateError] = useErrorMessage(async () => {
-  if (!isOwner.value) {
-    throw new Error('You are not authorized to remove the due date of this card.')
-  }
-
   await trpc.card.deleteDueDate.mutate({ id: props.card.id })
   selectedDueDate.value = null
+
   emit('update-card', {
     updatedField: 'dueDate',
     previousValue: props.card.dueDate,
@@ -162,9 +157,9 @@ function closeStartDateModal() {
       >
         <div class="w-96 scale-95 transform rounded-md bg-white p-6 shadow-lg transition-transform">
           <h2 class="mb-4 text-xl font-bold text-gray-800">Manage Card</h2>
+
           <div class="mb-6">
             <h4 class="mb-2 text-lg font-bold text-gray-700">Edit Card</h4>
-
             <label class="mb-4 block">
               <span class="mb-2 block text-sm font-medium text-gray-700">Title</span>
               <input
