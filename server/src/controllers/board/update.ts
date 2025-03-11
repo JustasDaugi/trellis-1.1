@@ -30,12 +30,11 @@ export default authenticatedProcedure
       if (!board) {
         throw new NotFoundError('Board not found')
       }
-
       if (board.userId !== authUser.id) {
         throw new ForbiddenError('You are not authorized to update this board')
       }
-
       const updatedBoard = await repos.boardRepository.update(id, newData)
+
       return updatedBoard
     }
   )

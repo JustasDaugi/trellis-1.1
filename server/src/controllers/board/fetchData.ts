@@ -5,7 +5,6 @@ import provideRepos from '@server/trpc/provideRepos'
 import { listRepository } from '@server/repositories/listRepository'
 import { cardRepository } from '@server/repositories/cardRepository'
 import { publicProcedure } from '@server/trpc'
-import { cacheMiddleware } from '@server/middleware'
 
 const cardPublicSchema = cardSchema
   .pick({
@@ -41,13 +40,6 @@ export default publicProcedure
     })
   )
   .input(listSchema.pick({ boardId: true }))
-  .use(
-    cacheMiddleware({
-      key: ({ input }) =>
-        `board:fetchData:${(input as { boardId: number }).boardId}`,
-      ttl: 5 * 60,
-    })
-  )
   .query(async ({ input: { boardId }, ctx: { repos } }) => {
     const lists = await repos.listRepository.findByBoardId(boardId)
 
