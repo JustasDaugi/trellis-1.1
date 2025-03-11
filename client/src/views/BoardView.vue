@@ -40,6 +40,8 @@ const userFirstName = ref<string | null>(null)
 
 const cardDueDates = ref<Record<number, string | null>>({})
 
+const isLoading = ref(true)
+
 function augmentListsData(listsData: any[]): any[] {
   return listsData.map((list) => ({
     ...list,
@@ -77,13 +79,14 @@ onBeforeMount(async () => {
       const fetchedListsData = await fetchLists(boardId)
       const augmentedLists = augmentListsData(fetchedListsData)
 
-      // Directly replace the existing 'lists' with our newly fetched data
       lists.value.splice(0, lists.value.length, ...augmentedLists)
     } else {
       console.error('User ID is not available.')
     }
   } catch (error) {
     console.error('Error initializing BoardView:', error)
+  } finally {
+    isLoading.value = false
   }
 })
 
@@ -206,10 +209,29 @@ const handleListTitleUpdate = async (listId: number, newTitle: string) => {
 }
 </script>
 
-
 <template>
+  <div v-if="isLoading" class="flex h-screen w-full items-center justify-center">
+    <svg
+      class="mr-3 h-12 w-12 animate-spin text-gray-300"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+    </svg>
+    <span class="text-xl text-white">Loading board...</span>
+  </div>
+
   <div
-    v-if="board"
+    v-else-if="board"
     :style="{
       backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : 'none',
       backgroundSize: 'cover',
