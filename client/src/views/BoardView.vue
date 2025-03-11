@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable'
-import { ref, onBeforeMount, nextTick, watch } from 'vue'
+import { ref, onBeforeMount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStorage } from '@vueuse/core'
 import { trpc } from '@/trpc'
 import { authUserId } from '@/stores/user'
 import AddListButton from '../components/BoardView/AddListButton.vue'
@@ -41,8 +40,6 @@ const userFirstName = ref<string | null>(null)
 
 const cardDueDates = ref<Record<number, string | null>>({})
 
-const storedLists = useStorage<ListCards[]>(`board-${boardId}-lists`, [])
-
 function augmentListsData(listsData: any[]): any[] {
   return listsData.map((list) => ({
     ...list,
@@ -80,11 +77,8 @@ onBeforeMount(async () => {
       const fetchedListsData = await fetchLists(boardId)
       const augmentedLists = augmentListsData(fetchedListsData)
 
-      if (storedLists.value.length > 0) {
-        lists.value.splice(0, lists.value.length, ...storedLists.value)
-      } else {
-        lists.value.splice(0, lists.value.length, ...augmentedLists)
-      }
+      // Directly replace the existing 'lists' with our newly fetched data
+      lists.value.splice(0, lists.value.length, ...augmentedLists)
     } else {
       console.error('User ID is not available.')
     }
@@ -92,14 +86,6 @@ onBeforeMount(async () => {
     console.error('Error initializing BoardView:', error)
   }
 })
-
-watch(
-  lists,
-  (newLists) => {
-    storedLists.value = newLists
-  },
-  { deep: true }
-)
 
 const selectedCard = ref<CardPublic | null>(null)
 const showDialog = ref(false)
@@ -219,6 +205,7 @@ const handleListTitleUpdate = async (listId: number, newTitle: string) => {
   }
 }
 </script>
+
 
 <template>
   <div
